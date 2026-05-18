@@ -306,13 +306,15 @@ class App:
         self.btn_pause = tk.Button(self.frame_btns, text="⏸  Pausar",
                                    font=("Segoe UI", 10), relief="flat",
                                    cursor="hand2", command=self._pausar,
-                                   padx=16, pady=7, state="disabled")
+                                   padx=16, pady=7, state="disabled",
+                                   disabledforeground="#ffffff")
         self.btn_pause.pack(side="left", padx=(0, 6))
 
         self.btn_stop = tk.Button(self.frame_btns, text="⏹  Detener",
                                   font=("Segoe UI", 10), relief="flat",
                                   cursor="hand2", command=self._detener,
-                                  padx=16, pady=7, state="disabled")
+                                  padx=16, pady=7, state="disabled",
+                                  disabledforeground="#ffffff")
         self.btn_stop.pack(side="left", padx=(0, 6))
 
         self.btn_limpiar = tk.Button(self.frame_btns, text="🗑  Limpiar log",
@@ -420,10 +422,12 @@ class App:
                                  activeforeground=t["btn_start_fg"])
         self.btn_pause.configure(bg=t["btn_pause_bg"], fg=t["btn_pause_fg"],
                                  activebackground=t["btn_pause_bg"],
-                                 activeforeground=t["btn_pause_fg"])
+                                 activeforeground=t["btn_pause_fg"],
+                                 disabledforeground="#ffffff")
         self.btn_stop.configure(bg=t["btn_stop_bg"], fg=t["btn_stop_fg"],
                                 activebackground=t["btn_stop_bg"],
-                                activeforeground=t["btn_stop_fg"])
+                                activeforeground=t["btn_stop_fg"],
+                                disabledforeground="#ffffff")
         self.btn_limpiar.configure(bg=t["btn_misc_bg"], fg=t["btn_misc_fg"],
                                    activebackground=t["btn_misc_bg"])
         self.btn_reset.configure(bg=t["btn_misc_bg"], fg=t["btn_misc_fg"],
@@ -743,15 +747,31 @@ class App:
         except Exception:
             pass
 
-        await page.locator("#tradeDiv span.select2-selection--single").click()
-        await page.wait_for_timeout(700)
-        search_input = page.locator("input.select2-search__field")
-        await search_input.wait_for(timeout=5_000)
+        # Esperar que el Select2 esté completamente inicializado
+        await page.wait_for_selector("#tradeDiv span.select2-selection--single",
+                                     state="visible", timeout=15_000)
+        await page.wait_for_timeout(500)
+
+        # Intentar abrir el Select2 con reintento si no aparece el input
+        for attempt in range(3):
+            await page.locator("#tradeDiv span.select2-selection--single").click()
+            await page.wait_for_timeout(1200)
+            search_input = page.locator("input.select2-search__field")
+            try:
+                await search_input.wait_for(state="visible", timeout=5_000)
+                break
+            except Exception:
+                if attempt == 2:
+                    raise
+                # Cerrar el dropdown si quedó abierto y reintentar
+                await page.keyboard.press("Escape")
+                await page.wait_for_timeout(800)
+
         await search_input.fill("")
         await search_input.type(trade_id, delay=80)
-        await page.wait_for_timeout(1500)
+        await page.wait_for_timeout(2000)
         opcion = page.locator(f"li.select2-results__option:has-text('{trade_id}')").first
-        await opcion.wait_for(state="visible", timeout=8_000)
+        await opcion.wait_for(state="visible", timeout=10_000)
         await opcion.click()
         await page.wait_for_timeout(1000)
         self._log("   ✅ Trade seleccionado", "ok")
