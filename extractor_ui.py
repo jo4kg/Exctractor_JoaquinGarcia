@@ -12,13 +12,18 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 import json
 import os
+try:
+    from PIL import Image, ImageTk
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
 
 # ============================================================
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION = "1.5.0"
-AUTHOR  = "Joaquín García²"
+VERSION       = "1.7.0"
+AUTHOR        = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"
 BASE_URL      = "https://pmp.abscapco.com"
@@ -146,6 +151,7 @@ class App:
         self.trades_estado = {}
         self.all_ids       = []
 
+        self._editor_labels = []
         self._build_ui()
         self._apply_theme()
 
@@ -162,21 +168,22 @@ class App:
         self.header.grid(row=0, column=0, sticky="ew")
         self.header.columnconfigure(1, weight=1)
 
-        # Branding izquierda
+        # Logo + nombre izquierda
         brand = tk.Frame(self.header)
         brand.grid(row=0, column=0, sticky="w", padx=16)
-        self.lbl_brand = tk.Label(brand,
-                                  text=f"Extractor {VERSION}  —  {AUTHOR}",
-                                  font=("Segoe UI", 10, "bold"))
+
+        self.logo_label = tk.Label(brand)
+        self.logo_label.pack(side="left", padx=(0, 10))
+        self._load_logo()
+
+        brand_text = tk.Frame(brand)
+        brand_text.pack(side="left")
+        self.lbl_brand = tk.Label(brand_text, text="Extractor de Trades",
+                                  font=("Segoe UI", 12, "bold"))
         self.lbl_brand.pack(anchor="w")
-        self.lbl_sub = tk.Label(brand, text="PMP Portfolio Management Platform",
+        self.lbl_sub = tk.Label(brand_text, text="PMP Portfolio Management Platform",
                                 font=("Segoe UI", 8))
         self.lbl_sub.pack(anchor="w")
-
-        # Título centro
-        self.lbl_title = tk.Label(self.header, text="📄  Extractor de Trades",
-                                  font=("Segoe UI", 15, "bold"))
-        self.lbl_title.grid(row=0, column=1)
 
         # Botón tema derecha
         self.btn_theme = tk.Button(self.header, text="☀️  Modo claro",
@@ -184,6 +191,11 @@ class App:
                                    cursor="hand2", bd=0,
                                    command=self._toggle_theme)
         self.btn_theme.grid(row=0, column=2, sticky="e", padx=16)
+
+        # Título centro (invisible, solo para balance)
+        self.lbl_title = tk.Label(self.header, text="",
+                                  font=("Segoe UI", 15, "bold"))
+        self.lbl_title.grid(row=0, column=1)
 
         # ── Body (izquierda + derecha) ───────────────────────
         self.body = tk.Frame(self.root)
@@ -293,6 +305,60 @@ class App:
                                     font=("Segoe UI", 8), anchor="e")
         self.lbl_counter.grid(row=4, column=0, sticky="e")
 
+        # Editor panel
+        self.editor_visible = False
+        self.frame_editor = tk.Frame(self.body)
+        self.frame_editor.columnconfigure(0, weight=1)
+        self.frame_editor.rowconfigure(1, weight=1)
+
+        lbl_editor = tk.Label(self.frame_editor, text="Editor de IDs",
+                              font=("Segoe UI", 10, "bold"), anchor="w")
+        lbl_editor.grid(row=0, column=0, sticky="w", pady=(4, 4))
+        self._editor_labels.append(lbl_editor)
+
+        list_edit_frame = tk.Frame(self.frame_editor)
+        list_edit_frame.grid(row=1, column=0, sticky="nsew")
+        list_edit_frame.columnconfigure(0, weight=1)
+        list_edit_frame.rowconfigure(0, weight=1)
+        self.listbox_editor = tk.Listbox(list_edit_frame, font=("Consolas", 9),
+                                         relief="flat", bd=0, selectmode="browse",
+                                         activestyle="none")
+        self.listbox_editor.grid(row=0, column=0, sticky="nsew")
+        sb_editor = ttk.Scrollbar(list_edit_frame, orient="vertical",
+                                  command=self.listbox_editor.yview)
+        sb_editor.grid(row=0, column=1, sticky="ns")
+        self.listbox_editor.configure(yscrollcommand=sb_editor.set)
+
+        row_add = tk.Frame(self.frame_editor)
+        row_add.grid(row=2, column=0, sticky="ew", pady=(8, 4))
+        row_add.columnconfigure(0, weight=1)
+        self.entry_new_id = tk.Entry(row_add, font=("Segoe UI", 10),
+                                     relief="flat", bd=0, highlightthickness=1)
+        self.entry_new_id.grid(row=0, column=0, sticky="ew", ipady=6, padx=(0, 6))
+        self.entry_new_id.bind("<Return>", lambda e: self._editor_agregar())
+        self.btn_add_id = tk.Button(row_add, text="+ Agregar",
+                                    font=("Segoe UI", 10), relief="flat",
+                                    cursor="hand2", padx=10, pady=5,
+                                    command=self._editor_agregar)
+        self.btn_add_id.grid(row=0, column=1)
+
+        row_edit_btns = tk.Frame(self.frame_editor)
+        row_edit_btns.grid(row=3, column=0, sticky="ew", pady=(0, 4))
+        self.btn_del_id = tk.Button(row_edit_btns, text="Eliminar seleccionado",
+                                    font=("Segoe UI", 10), relief="flat",
+                                    cursor="hand2", padx=10, pady=6,
+                                    command=self._editor_eliminar)
+        self.btn_del_id.pack(side="left", padx=(0, 6))
+        self.btn_save_ids = tk.Button(row_edit_btns, text="Guardar en Excel",
+                                      font=("Segoe UI", 10, "bold"), relief="flat",
+                                      cursor="hand2", padx=10, pady=6,
+                                      command=self._editor_guardar)
+        self.btn_save_ids.pack(side="right")
+
+        self.lbl_editor_status = tk.Label(self.frame_editor, text="",
+                                          font=("Segoe UI", 8), anchor="w")
+        self.lbl_editor_status.grid(row=4, column=0, sticky="w")
+
         # ── Botones de acción ────────────────────────────────
         self.frame_btns = tk.Frame(self.root, padx=14, pady=8)
         self.frame_btns.grid(row=2, column=0, sticky="ew")
@@ -329,6 +395,12 @@ class App:
                                    padx=12, pady=7)
         self.btn_reset.pack(side="right")
 
+        self.btn_editor = tk.Button(self.frame_btns, text="✏️  Editar IDs",
+                                    font=("Segoe UI", 10), relief="flat",
+                                    cursor="hand2", command=self._toggle_editor,
+                                    padx=12, pady=7)
+        self.btn_editor.pack(side="right", padx=(0, 6))
+
         # Progreso + status en la misma barra
         prog_frame = tk.Frame(self.frame_btns)
         prog_frame.pack(side="right", padx=(0, 12), fill="x", expand=True)
@@ -343,10 +415,102 @@ class App:
         self.progress.pack(fill="x")
 
         # Status bar
-        self.status = tk.Label(self.root, text=f"Extractor {VERSION}  |  Listo",
+        self.status = tk.Label(self.root,
+                               text=f"Extractor {VERSION}  —  {AUTHOR}  |  Listo",
                                font=("Segoe UI", 8), anchor="w", padx=14, pady=3)
         self.status.grid(row=3, column=0, sticky="ew")
         self.root.rowconfigure(3, weight=0)
+
+    def _toggle_editor(self):
+        if not self.editor_visible:
+            self.body.columnconfigure(2, weight=2)
+            self.frame_editor.grid(row=0, column=2, sticky="nsew", padx=(6, 14), pady=6)
+            self.frame_editor.rowconfigure(1, weight=1)
+            self._editor_cargar()
+            self.btn_editor.config(text="Cerrar editor")
+            self.editor_visible = True
+        else:
+            self.frame_editor.grid_remove()
+            self.btn_editor.config(text="Editar IDs")
+            self.editor_visible = False
+
+    def _editor_cargar(self):
+        self.listbox_editor.delete(0, "end")
+        excel = self.excel_path.get()
+        if not excel or not Path(excel).exists():
+            self.lbl_editor_status.config(text="Carga un Excel primero.")
+            return
+        try:
+            df = pd.read_excel(excel)
+            if COLUMNA_IDS not in df.columns:
+                self.lbl_editor_status.config(text=f"Columna {COLUMNA_IDS} no encontrada.")
+                return
+            ids = df[COLUMNA_IDS].dropna().astype(str).str.strip().tolist()
+            for id_ in ids:
+                self.listbox_editor.insert("end", f"  {id_}")
+            self.lbl_editor_status.config(text=f"{len(ids)} IDs cargados.")
+        except Exception as e:
+            self.lbl_editor_status.config(text=f"Error: {e}")
+
+    def _editor_agregar(self):
+        new_id = self.entry_new_id.get().strip()
+        if not new_id:
+            return
+        existing = [self.listbox_editor.get(i).strip() for i in range(self.listbox_editor.size())]
+        if new_id in existing:
+            self.lbl_editor_status.config(text=f"'{new_id}' ya existe.")
+            return
+        self.listbox_editor.insert("end", f"  {new_id}")
+        self.entry_new_id.delete(0, "end")
+        self.lbl_editor_status.config(text=f"'{new_id}' agregado. Total: {self.listbox_editor.size()}")
+
+    def _editor_eliminar(self):
+        sel = self.listbox_editor.curselection()
+        if not sel:
+            self.lbl_editor_status.config(text="Selecciona un ID para eliminar.")
+            return
+        id_text = self.listbox_editor.get(sel[0]).strip()
+        self.listbox_editor.delete(sel[0])
+        self.lbl_editor_status.config(text=f"'{id_text}' eliminado. Total: {self.listbox_editor.size()}")
+
+    def _editor_guardar(self):
+        excel = self.excel_path.get()
+        if not excel or not Path(excel).exists():
+            self.lbl_editor_status.config(text="No hay Excel seleccionado.")
+            return
+        try:
+            ids = [self.listbox_editor.get(i).strip() for i in range(self.listbox_editor.size())]
+            ids = [id_ for id_ in ids if id_]
+            df = pd.read_excel(excel)
+            df_new = pd.DataFrame({COLUMNA_IDS: ids})
+            for col in df.columns:
+                if col != COLUMNA_IDS:
+                    df_new[col] = df[col].reindex(df_new.index)
+            df_new.to_excel(excel, index=False)
+            self.lbl_editor_status.config(text=f"Guardado — {len(ids)} IDs en {Path(excel).name}")
+            if self.all_ids:
+                self.all_ids = ids
+                self.trades_estado = {id_: self.trades_estado.get(id_, ESTADO_PENDIENTE) for id_ in ids}
+                self._refresh_list()
+        except Exception as e:
+            self.lbl_editor_status.config(text=f"Error guardando: {e}")
+
+
+    # ── LOGO ─────────────────────────────────────────────────
+
+    def _load_logo(self):
+        try:
+            if not PIL_AVAILABLE:
+                return
+            logo_path = APP_DIR / "logo.png"
+            if not logo_path.exists():
+                return
+            img = Image.open(logo_path)
+            img = img.resize((56, 56), Image.LANCZOS)
+            self._logo_img = ImageTk.PhotoImage(img)
+            self.logo_label.config(image=self._logo_img)
+        except Exception:
+            pass
 
     # ── THEME ────────────────────────────────────────────────
 
@@ -363,7 +527,15 @@ class App:
 
         # Header
         self.header.configure(bg=t["bg2"])
-        self.header.winfo_children()[0].configure(bg=t["bg2"])  # brand frame
+        for w in self.header.winfo_children():
+            if isinstance(w, tk.Frame):
+                w.configure(bg=t["bg2"])
+                for ww in w.winfo_children():
+                    if isinstance(ww, tk.Frame):
+                        ww.configure(bg=t["bg2"])
+                    if isinstance(ww, tk.Label):
+                        ww.configure(bg=t["bg2"])
+        self.logo_label.configure(bg=t["bg2"])
         self.lbl_brand.configure(bg=t["bg2"], fg=t["fg"])
         self.lbl_sub.configure(bg=t["bg2"], fg=t["fg2"])
         self.lbl_title.configure(bg=t["bg2"], fg=t["fg"])
@@ -442,6 +614,27 @@ class App:
                              thickness=8)
 
         self.status.configure(bg=t["bg2"], fg=t["fg2"])
+        if hasattr(self, "frame_editor"):
+            self.frame_editor.configure(bg=t["bg"])
+            for lbl in self._editor_labels:
+                lbl.configure(bg=t["bg"], fg=t["fg_label"])
+            self.listbox_editor.configure(bg=t["bg_panel"], fg=t["fg"],
+                                          selectbackground=t["list_sel"])
+            self.listbox_editor.master.configure(bg=t["bg"])
+            self.entry_new_id.configure(bg=t["bg3"], fg=t["fg"],
+                                        insertbackground=t["fg"],
+                                        highlightbackground=t["border"],
+                                        highlightcolor=t["accent"])
+            self.entry_new_id.master.configure(bg=t["bg"])
+            self.btn_add_id.configure(bg=t["btn_start_bg"], fg=t["btn_start_fg"])
+            self.btn_del_id.configure(bg=t["btn_stop_bg"], fg=t["btn_stop_fg"])
+            self.btn_save_ids.configure(bg=t["btn_acc_bg"], fg=t["btn_acc_fg"])
+            self.lbl_editor_status.configure(bg=t["bg"], fg=t["fg2"])
+            for w in self.frame_editor.winfo_children():
+                if isinstance(w, tk.Frame):
+                    w.configure(bg=t["bg"])
+        if hasattr(self, "btn_editor"):
+            self.btn_editor.configure(bg=t["btn_misc_bg"], fg=t["btn_misc_fg"])
 
         # Refresh list colors
         self._refresh_list()
@@ -573,7 +766,7 @@ class App:
         self.btn_start.config(state="disabled")
         self.btn_pause.config(state="normal")
         self.btn_stop.config(state="normal")
-        self.status.config(text=f"Extractor {VERSION}  |  Ejecutando...")
+        self.status.config(text=f"Extractor {VERSION}  —  {AUTHOR}  |  Ejecutando...")
         threading.Thread(target=self._run_async, daemon=True).start()
 
     def _pausar(self):
@@ -582,19 +775,19 @@ class App:
             self._pause_event.clear()
             self.btn_pause.config(text="▶  Reanudar")
             self._log("⏸  Pausado — hacé click en Reanudar para continuar.", "warning")
-            self.status.config(text=f"Extractor {VERSION}  |  Pausado")
+            self.status.config(text=f"Extractor {VERSION}  —  {AUTHOR}  |  Pausado")
         else:
             self.paused = False
             self._pause_event.set()
             self.btn_pause.config(text="⏸  Pausar")
             self._log("▶  Reanudando...", "ok")
-            self.status.config(text=f"Extractor {VERSION}  |  Ejecutando...")
+            self.status.config(text=f"Extractor {VERSION}  —  {AUTHOR}  |  Ejecutando...")
 
     def _detener(self):
         self.running = False
         self._pause_event.set()
         self._log("⏹  Deteniendo... (termina el trade actual)", "warning")
-        self.status.config(text=f"Extractor {VERSION}  |  Deteniendo...")
+        self.status.config(text=f"Extractor {VERSION}  —  {AUTHOR}  |  Deteniendo...")
 
     def _run_async(self):
         asyncio.run(self._extraer())
@@ -605,7 +798,7 @@ class App:
         self.btn_start.config(state="normal")
         self.btn_pause.config(state="disabled", text="⏸  Pausar")
         self.btn_stop.config(state="disabled")
-        self.status.config(text=f"Extractor {VERSION}  |  Listo")
+        self.status.config(text=f"Extractor {VERSION}  —  {AUTHOR}  |  Listo")
 
     # ── LÓGICA PRINCIPAL ─────────────────────────────────────
 
