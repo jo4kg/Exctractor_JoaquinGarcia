@@ -1,0 +1,1844 @@
+﻿var common = $("#TradeCall").data();
+$("#asofdate").datepicker().datepicker("setDate", "");
+$('#asofdate').prop('disabled', true);
+$('#vehicleId').prop('disabled', true);
+var asOfDateHistory = "";
+Bcri.Core.LoadingScreen.show();
+
+function setDatePicker() {
+    $("#asofdate").datepicker().datepicker("setDate", new Date());
+
+}
+
+var ExternalTradeIdSelected = "";
+
+$(document).ready(function () {
+
+    //TradeTree related
+
+    $("#Id").select2({
+        placeholder: " ",
+        allowClear: true
+    })
+        .on('change', function () {
+            loadTree($(this).val());
+        });
+    loadTree($('#Id').val());
+
+    //End tradetree related
+
+    $('.modal').on('shown.bs.modal', function (e) {
+        $('.carousel').carousel('pause');
+    });
+
+    var urlcombo = common.loadcombotradeorentity;
+    $.datepicker.setDefaults($.datepicker.regional["en"]);
+    $.datepicker.setDefaults({
+        onSelect: function (dateText, inst) {
+            $("#asofdate").trigger('change');
+        }
+    });
+
+    $("#asofdate").change(function () {
+        $("#vehicleId").select2("val", 0);
+        $('#vehicleId').prop('disabled', true);
+        $("#tradeId").select2("val", 0);
+        var asofdate = $("#asofdate").val();
+        $("#tradeId").prop('disabled', true);
+        $.post(urlcombo, { asofdate: asofdate },
+            function (result) {
+                var select = $("#tradeId");
+                select.empty();
+                select.append($('<option/>', { value: '', text: '' }));
+                $.each(result, function (index, data) {
+                    select.append($('<option/>', {
+                        value: data.Value,
+                        text: data.Text
+                    }));
+                });
+                $("#tradeId").prop('disabled', false);
+
+            });
+    });
+
+    $('input[id="checkboxdate"]').on('change', function (e) {
+        if ($('input[id="checkboxdate"]:checked').length == 1) {
+            $('#asofdate').prop('disabled', false);
+            $('#but_newTransaction').attr("disabled", false);
+            setDatePicker();
+            $("#vehicleId").select2("val", 0);
+            $('#vehicleId').prop('disabled', true);
+            $("#tradeId").select2("val", 0);
+            var asofdate = $("#asofdate").val();
+            $("#tradeId").prop('disabled', true);
+            //$.post(urlcombo, { asofdate: asofdate },
+            //    function (result) {
+            //        var select = $("#tradeId");
+            //        select.empty();
+            //        select.append($('<option/>', { value: '', text: '' }));
+            //        $.each(result, function (index, data) {
+            //            select.append($('<option/>', {
+            //                value: data.Value,
+            //                text: data.Text
+            //            }));
+            //        });
+            //        $("#tradeId").prop('disabled', false);
+            //    });
+           
+            $.ajax({
+                url: baseUrl + "/Report/Data",
+                global: false,
+                type: "GET",
+                data: {
+                    ReportCode: 'GetTradeEntity',
+                    AsOfDate: asofdate
+                },
+                dataType: "json",
+                async: true,
+                success: function (result) {
+                    var select = $("#tradeId");
+                    select.empty();
+                    select.append($('<option/>', { value: '', text: '' }));
+                    $.each(result, function (index, data) {
+                        select.append($('<option/>', {
+                            value: data.Value,
+                            text: data.Text
+                        }));
+                    });
+                    $("#tradeId").prop('disabled', false);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                 
+
+                },
+                complete: function (jqXHR, status) {
+                }
+            });
+            
+
+        } else {
+            $("#tradeId").select2("val", 0);
+            $("#vehicleId").select2("val", 0);
+            $('#vehicleId').prop('disabled', true);
+            $('#asofdate').prop('disabled', true);
+            $('#but_newTransaction').attr("disabled", true);
+            $("#asofdate").datepicker().datepicker("setDate", "");
+            $("#tradeId").prop('disabled', true);
+            //$.post(urlcombo, { asofdate: "" },
+            //    function (result) {
+            //        var select = $("#tradeId");
+            //        select.empty();
+            //        select.append($('<option/>', { value: '', text: '' }));
+            //        $.each(result, function (index, data) {
+            //            select.append($('<option/>', {
+            //                value: data.Value,
+            //                text: data.Text
+            //            }));
+            //        });
+            //        $("#tradeId").prop('disabled', false);
+            //    });
+
+            $.ajax({
+                url: baseUrl + "/Report/Data",
+                global: false,
+                type: "GET",
+                data: {
+                    ReportCode: 'GetTradeEntity',
+                    AsOfDate: ''
+                },
+                dataType: "json",
+                async: true,
+                success: function (result) {
+                    var select = $("#tradeId");
+                    select.empty();
+                    select.append($('<option/>', { value: '', text: '' }));
+                    $.each(result, function (index, data) {
+                        select.append($('<option/>', {
+                            value: data.Value,
+                            text: data.Text
+                        }));
+                    });
+                    $("#tradeId").prop('disabled', false);
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+
+
+                },
+
+                complete: function (jqXHR, status) {
+                }
+            });
+        }
+    });
+
+    ////$('#asofdate').on('change', function (e) {
+    //    if (!$("#asofdate").val()) {
+    //        $("#exportAll").attr("disabled", true);
+    //        swal("Error!", "The date must have a value", "error",
+    //            {
+    //                buttons: {
+    //                    cancel: "Exit",
+    //                },
+    //            });
+    //        $(".swal-text").css("text-align", "center");
+    //    }
+    //    else {
+    //        Bcri.Core.LoadingScreen.show();
+    //        $("#exportAll").attr("disabled", false);
+
+    //        $.ajax({
+    //            url: baseUrl + "/Report/Data",
+    //            global: false,
+    //            type: "GET",
+    //            data: {
+    //                ReportCode: 'CashReport',
+    //                //verificar si se le puede pasar nulo o necesita siempre asofdate
+    //                asofdate: $("#asofdate").val() ? moment($("#asofdate").val()).format("MM/DD/YYYY") : '',
+    //            },
+    //            dataType: "json",
+
+    //            success: function (data) {
+
+    //                if (CashReportDataSource != undefined) {
+    //                    CashReportDataSource.dispose();
+    //                }
+    //                var CashReportDataSource = new DevExpress.data.DataSource({
+    //                    store: data = data,
+    //                    type: 'array',
+    //                    key: 'VehicleEntity_Id'
+    //                });
+
+    //                $("#cashReportGrid").dxDataGrid({
+    //                    dataSource: CashReportDataSource
+    //                });
+
+
+
+
+    //            },
+    //            error: function (xhr, ajaxOptions, thrownError) {
+    //                swal("Error!", "Error while loading Grid info, if error persist contact system administrator", "error",
+    //                    {
+    //                        buttons: {
+    //                            cancel: "Exit",
+    //                        },
+    //                    });
+    //                $(".swal-text").css("text-align", "center");
+
+    //            },
+
+    //            complete: function (jqXHR, status) {
+    //                Bcri.Core.LoadingScreen.hide();
+    //            }
+    //        });
+    //    }
+
+    //});
+
+    $('#tradeId').on("select2:select", function (e) {
+        //$("#tradeBlotterLoading").show();
+        Bcri.Core.LoadingScreen.show();
+        $("#divTradeBlotter").hide();
+        $("#tradeId").select2({
+            placeholder: " ",
+            allowClear: true
+        }).on('change', function () {
+            e.preventDefault();
+            var grid = $('#TradeBlotterGrid').dxDataGrid('instance');
+            grid.option('dataSource', []);
+            $("#TradeDetail").hide();
+            $("#tabs").show();
+            $("#vehicleId").select2("val", 0);
+            $('#vehicleId').prop('disabled', true);
+        });
+
+
+        var EntityIdSplit = $('#tradeId').val().split("-");
+        var urlComboVehicle = common.loadcombo;
+        var asofdate = $("#asofdate").val();
+        if (EntityIdSplit[1] == "T") {
+            $("#vehicleId").select2("val", 0);
+            $('#vehicleId').prop('disabled', false);
+            $('#tradeId').prop('disabled', false);
+            //LoadTradeGrid();
+
+            $.post(urlComboVehicle, { tradeId: 0, asofdate: asofdate },
+                function (result) {
+                    var select = $("#vehicleId");
+                    select.empty();
+                    select.append($('<option/>', { value: '', text: '' }));
+                    $.each(result, function (index, data) {
+                        select.append($('<option/>', {
+                            value: data.Value,
+                            text: data.Text
+                        }));
+                    });
+                });
+
+        } else {
+            $('#vehicleId').prop('disabled', false);
+            $("#vehicleId").focus();
+
+            $.post(urlComboVehicle, { tradeId: EntityIdSplit[0], asofdate: asofdate },
+                function (result) {
+                    var select = $("#vehicleId");
+                    select.empty();
+                    select.append($('<option/>', { value: '', text: '' }));
+                    $.each(result, function (index, data) {
+                        select.append($('<option/>', {
+                            value: data.Value,
+                            text: data.Text
+                        }));
+                    });
+                });
+
+        }
+        LoadTradeGrid();
+
+
+    });
+
+    $('#vehicleId').on("select2:select", function (e) {
+        $("#vehicleId").select2({
+            placeholder: " ",
+            allowClear: true
+        });
+        LoadTradeGrid();
+    });
+    $("#TradeBlotterGrid").dxDataGrid(
+        {
+            dataSource:
+            {
+                store: {
+                    type: 'array',
+                    key: 'Id'
+                }
+            },
+            columns: [
+                {
+                    dataField: "TradeId",
+                    //cellTemplate: function (container, options) {
+                    //    $('<a>' + options.values + '</a>').addClass('dx-link')
+                    //        .text(options.row.data.TradeId)
+                    //        .on('dxclick', function (e) {
+                    //ShowTrade('',options.row.data.TradeStock_Id,0);
+                    //        })
+                    //        .appendTo(container);
+                    // }
+                },
+                "Transaction",
+                "AgreementName",
+                "RelatedTradeId",
+                {
+                    dataField: "LenderRole",
+                    visible: true,
+                    caption: "Party Role",
+                    width: 100
+                },
+                {
+                    dataField: "Lender",
+                    caption: "Party",
+                    visible: true,
+                    width: 100
+                },
+                {
+                    dataField: "BorrowerRole",
+                    visible: true,
+                    caption: "Counterparty Role",
+                    width: 100
+                },
+                {
+                    dataField: "Borrower",
+                    caption: "Counterparty",
+                    visible: true,
+                    width: 100
+                },
+                {
+                    dataField: 'PrincipalAmount',
+                    Name: 'PrincipalAmount',
+                    caption: 'Principal Amount',
+                    format: 'currency',
+                    precision: 2
+                },
+                {
+                    dataField: 'CurrentPrincipal',
+                    caption: 'Current Principal Amount',
+                    format: 'currency',
+                    precision: 2
+                },
+                "Restriction",
+                {
+                    dataField: 'AccrualInterest',
+                    caption: 'Accrual Interest',
+                    format: 'currency',
+                    precision: 2
+                },
+                {
+                    dataField: "ValueDate",
+                    dataType: 'date'
+                },
+                {
+                    dataField: "MaturityDate",
+                    dataType: 'date'
+                },
+                {
+                    dataField: "DocDate",
+                    dataType: 'date'
+                },
+                {
+                    dataField: "InterestEffectiveDate",
+                    dataType: 'date'
+                },
+                "InterestPeriod",
+                "InterestCalcBase",
+                {
+                    dataField: 'AccruedInterestAmount',
+                    Name: 'AccruedInterestAmount',
+                    caption: 'Accrued Interest Amount',
+                    format: 'currency',
+                    precision: 2
+                },
+                {
+                    dataField: 'AccrualInterestToday',
+                    caption: 'Accrual Interest Today',
+                    format: 'currency',
+                    precision: 2
+                },
+                {
+                    dataField: "LenderAffiliation",
+                    visible: true,
+                    caption: "Party Affiliation",
+                    width: 100
+                },
+                {
+                    dataField: "BorrowerAffiliation",
+                    visible: true,
+                    caption: "Counterparty Affiliation",
+                    width: 100
+                },
+                "Party3",
+                "Party3Affiliation",
+                "Coupon",
+                {
+                    dataField: 'CouponFixedRate',
+                    Name: 'CouponFixedRate',
+                    caption: 'Coupon Fixed Rate',
+                    format: 'fixedPoint',
+                    precision: 2
+                },
+                {
+                    dataField: 'Id',
+                    Name: 'Id',
+                    caption: 'id',
+                    visible: false
+                },
+                {
+                    dataField: "TradeStockHeaderId",
+                    visible: false
+                },
+                "FirstDocumentId",
+                "DocumentId",
+                //{
+                //    dataField: "Link",
+                //    caption: 'History',
+                //    allowFiltering: false,
+                //    allowOrdering: false,
+                //    width: 60,
+                //    cssClass: "tradeDetail",
+                //    cellTemplate: function (container, options) {
+                //        $('<a>' + options.values + '</a>').addClass('dx-link')
+                //            .text('View')
+                //            .on('dxclick', function (e) {
+                //                $('.nav-tabs a[href="#TradeHistory"]').tab('show');
+                //                var headerId = options.row.data.TradeStockHeaderId;
+                //                FilterTradeHistory(headerId);
+                //            })
+                //            .appendTo(container);
+                //    }
+                //},
+                "HasAmmended",
+                "AgreementCategory",
+                "Origin",
+                "Equity",
+                "OriginalCounterParty",
+                {
+                    dataField: 'PurchaseAmount',
+                    Name: 'PurchaseAmount',
+                    caption: 'Purchase Amount',
+                    format: 'currency',
+                    precision: 2
+                },
+                {
+                    dataField: "OriginalValueDate",
+                    dataType: 'date',
+                    visible: false
+                },
+                {
+                    dataField: "OriginalMaturityDate",
+                    dataType: 'date',
+                    visible: false
+                },
+                {
+                    dataField: "FirstInterestPaymentDate",
+                    dataType: 'date'
+                },
+
+
+                {
+                    dataField: "CouponSpread",
+                    Name: "CouponSpread",
+                    caption: 'Coupon Spread',
+                    format: 'fixedPoint',
+                    precision: 2
+                },
+                {
+                    dataField: "FirstPrincipalPaymentDate",
+                    dataType: 'date'
+                },
+                "IsPrincipalPrepayable",
+                "FeeAmount",
+                "FeePayee",
+                "FeePayor",
+                {
+                    dataField: "FirstFeePaymentDate",
+                    dataType: 'date'
+                },
+                "FeePeriod",
+                "FeesApplicable",
+                "PrincipalPeriod",
+                "PrincipalPaymentAmount",
+                "Term",
+                "Position",
+                "Seniority",
+                "Security",
+                "Instrument",
+                "TradeLine"
+
+
+            ],
+            scrolling: {
+                mode: "standard",
+                showScrollbar: "always" // or "onClick" | "always" | "never"
+            },
+            summary: {
+                groupItems: [
+                    {
+                        column: "TradeId",
+                        summaryType: "count",
+                        displayFormat: "Count: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: 'Id',
+                        showInColumn: 'CouponFixedRate',
+                        //showInColumn: 'CouponFixedRate',
+                        summaryType: "custom",
+                        name: 'WAC',
+                        displayFormat: "WAC: {0}",
+                        valueFormat: "fixedPoint",
+                        precision: 2,
+                        showInGroupFooter: true
+                    },
+                    {
+                        column: 'Id',
+                        showInColumn: 'MaturityDate',
+                        summaryType: "custom",
+                        name: 'WAM',
+                        displayFormat: "WAM: {0}",
+                        valueFormat: "fixedPoint",
+                        precision: 2,
+                        showInGroupFooter: true
+                    },
+                    {
+                        column: "PurchaseAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Subtotal: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "PrincipalAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Subtotal: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "CurrentPrincipal",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        displayFormat: "Subtotal: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "AccrualInterest",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Subtotal: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "AccruedInterestAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Subtotal: {0}",
+                        showInGroupFooter: true
+                    }
+
+                ],
+                totalItems: [
+                    {
+                        column: "TradeId",
+                        summaryType: "count",
+                        displayFormat: "Count: {0}",
+                        showInGroupFooter: true
+                    },
+                    {
+                        column: 'Id', //WAC
+                        showInColumn: 'CouponFixedRate',
+                        summaryType: "custom",
+                        name: 'WAC',
+                        displayFormat: "WAC: {0}",
+                        valueFormat: "fixedPoint",
+                        precision: 2,
+                        showInGroupFooter: true
+                    },
+                    {
+                        column: 'Id', //WAM
+                        showInColumn: 'MaturityDate',
+                        summaryType: "custom",
+                        name: 'WAM',
+                        displayFormat: "WAM: {0}",
+                        valueFormat: "fixedPoint",
+                        precision: 2,
+                        showInGroupFooter: true
+                    },
+                    {
+                        column: "PurchaseAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Total: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "PrincipalAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Total: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "CurrentPrincipal",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Total: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "AccrualInterest",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Total: {0}",
+                        showInGroupFooter: true
+                    }, {
+                        column: "AccruedInterestAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        precision: 2,
+                        displayFormat: "Total: {0}",
+                        showInGroupFooter: true
+                    }],
+                calculateCustomSummary: function (options) {
+                    switch (options.name) {
+                        case 'WAC':
+                            {
+                                switch (options.summaryProcess) {
+                                    case 'start':
+                                        {
+                                            options.totalValue = 0;
+                                            options.totalPrincipal = 0;
+                                            break;
+                                        }
+                                    case 'calculate':
+                                        {
+                                            var migrilla = options.component;
+                                            options.component.getDataByKeys([options.value])
+                                                .then(function (data) {
+                                                    var rowData = data[0];
+                                                    options.totalValue += Math.abs(rowData.PrincipalAmount) * (rowData.CouponFixedRate / 100);
+                                                    options.totalPrincipal += Math.abs(rowData.PrincipalAmount);
+                                                });
+                                            break;
+                                        }
+                                    case 'finalize':
+                                        {
+                                            options.totalValue = (options.totalValue / options.totalPrincipal) * 100;
+                                            break;
+                                        }
+
+                                }
+                                break;
+                            }
+                        case 'WAM':
+                            {
+                                switch (options.summaryProcess) {
+                                    case 'start':
+                                        {
+                                            options.totalValue = 0;
+                                            options.totalWAM = 0;
+                                            break;
+                                        }
+                                    case 'calculate':
+                                        {
+                                            var migrilla = options.component;
+                                            options.component.getDataByKeys([options.value])
+                                                .then(function (data) {
+                                                    var rowData = data[0];
+                                                    options.totalWAM += -Math.abs(rowData.PrincipalAmount) * moment().diff(rowData.MaturityDate, 'days');
+                                                    options.totalValue += Math.abs(rowData.PrincipalAmount);
+                                                });
+                                            break;
+                                        }
+                                    case 'finalize':
+                                        {
+                                            options.totalValue = (options.totalWAM / options.totalValue) / 360;
+                                            break;
+                                        }
+                                }
+                                break;
+                            }
+                    }
+                }
+
+            },
+            onRowClick: function (selectedItems) {
+                var data = selectedItems.data["Id"];
+
+                if (data != undefined) {
+                    TradeId = data;
+                    ExternalTradeIdSelected = selectedItems.data["TradeId"];
+                    TradeLineSelected = selectedItems.data["TradeLine"];
+                    LoadTradeDetail(TradeId);
+                    Bcri.Core.LoadingScreen.show();
+                }
+            },
+            onSelectionChanged: function (selectedItems) {
+                //var data = selectedItems.selectedRowsData[0];
+                //if(data.Id != undefined){
+                //TradeId = data.Id;
+                //LoadTradeDetail(TradeId);
+                //$('#myModal').modal('show');
+                //}
+            },
+            onValueChanged: function (info) {
+                var dataGrid = $('#TradeBlotterGrid').dxDataGrid('instance');
+
+                dataGrid.option({
+                    selection: { allowSelectAll: info.value }
+                });
+            },
+            filterRow: {
+                visible: true,
+                applyFilter: "auto"
+            },
+            searchPanel: {
+                visible: true,
+                width: 240,
+                placeholder: "Search..."
+            }, headerFilter: {
+                visible: true
+            },
+            columnChooser: {
+                enabled: true
+            },
+            paging: {
+                pageSize: 10
+            },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [5, 10, 20],
+                showInfo: true
+            },
+            groupPanel: { visible: true },
+            allowColumnReordering: true,
+            allowColumnResizing: true,
+            columnAutoWidth: true,
+            export: {
+                enabled: true,
+                fileName: "TradeBlotter"
+            },
+            selection: {
+                mode: "single"
+            },
+            hoverStateEnabled: true
+        });
+    $('#tradeId').select2();
+    $('#vehicleId').select2();
+    $('.2').select2();
+    $('input[id="checkboxdate"]').prop('checked', 'checked');
+    $('input[id="checkboxdate"]').trigger('change');
+    $("#CashEvent").dxDataGrid({
+        columns: [
+            {
+                dataField: "Id",
+                visible: false
+            },
+            {
+                dataField: "ExternalTradeId",
+                cellTemplate: function (container, options) {
+                    $('<a>' + options.row.data.ExternalTradeId + '</a>').addClass('dx-link')
+                        .text(options.row.data.ExternalTradeId)
+                        .on('dxclick', function (e) {
+                            LoadTradeDetailView(null, options.row.data.Date, false, options.row.data.ExternalTradeId);
+                            Bcri.Core.LoadingScreen.show();
+                        })
+                        .appendTo(container);
+                }
+            },
+            {
+                dataField: "Date",
+                dataType: 'date'
+            },
+            "Name",
+            {
+                dataField: 'Amount',
+                format: 'currency',
+                precision: 2
+            },
+            "Comment"
+        ],
+        scrolling: {
+            mode: "standard",
+            showScrollbar: "always" // or "onClick" | "always" | "never"
+        },
+        filterRow: {
+            visible: true,
+            applyFilter: "auto"
+        },
+        searchPanel: {
+            visible: true,
+            width: 240,
+            placeholder: "Search..."
+        },
+        headerFilter: {
+            visible: true
+        },
+        columnChooser: {
+            enabled: true
+        },
+        paging: {
+            pageSize: 10
+        },
+        pager: {
+            showPageSizeSelector: true,
+            allowedPageSizes: [5, 10, 20],
+            showInfo: true
+        },
+        groupPanel: { visible: true },
+        allowColumnReordering: true,
+        allowColumnResizing: true,
+        columnAutoWidth: true,
+        export: {
+            enabled: true,
+            fileName: "CashEvent"
+        }
+
+
+    });
+
+    $("#DailyAcrualInterest").dxDataGrid({
+        columns: [
+            {
+                dataField: "TraseStock_Id",
+                visible: false
+            },
+            {
+                dataField: "TradeId",
+                cellTemplate: function (container, options) {
+                    $('<a>' + options.values + '</a>').addClass('dx-link')
+                        .text(options.row.data.TradeId)
+                        .on('dxclick', function (e) {
+                            LoadTradeDetailView(options.row.data.TradeStock_Id);
+                            Bcri.Core.LoadingScreen.show();
+                        })
+                        .appendTo(container);
+                }
+            },
+            "RelatedTradeId",
+            {
+                dataField: "Date",
+                dataType: 'date'
+            },
+            {
+                dataField: 'Principal',
+                format: 'currency',
+                precision: 2
+            },
+            {
+                dataField: 'DayInterest',
+                format: 'currency',
+                precision: 11
+            },
+            {
+                dataField: "PaymentDate",
+                dataType: 'date'
+            },
+            {
+                dataField: 'AccrualInterestLastPayment',
+                format: 'currency',
+                precision: 11
+            },
+            {
+                dataField: 'AccrualInterestMonth',
+                format: 'currency',
+                precision: 11
+            },
+            "TradeLine",
+            {
+                dataField: 'AccrualInterestLine',
+                format: 'currency',
+                precision: 11
+            },
+            {
+                dataField: 'AccruedInterestByTransfer',
+                format: 'currency',
+                precision: 11
+            }
+        ],
+        scrolling: {
+            mode: "standard",
+            showScrollbar: "always" // or "onClick" | "always" | "never"
+        },
+        filterRow: {
+            visible: true,
+            applyFilter: "auto"
+        },
+        searchPanel: {
+            visible: true,
+            width: 240,
+            placeholder: "Search..."
+        },
+        headerFilter: {
+            visible: true
+        },
+        columnChooser: {
+            enabled: true
+        },
+        paging: {
+            pageSize: 10
+        },
+        pager: {
+            showPageSizeSelector: true,
+            allowedPageSizes: [5, 10, 20],
+            showInfo: true
+        },
+        groupPanel: { visible: true },
+        allowColumnReordering: true,
+        allowColumnResizing: true,
+        columnAutoWidth: true,
+        export: {
+            enabled: true,
+            fileName: "DailyAcrualInterest"
+        }
+
+
+    });
+
+    $("#Payments").dxDataGrid({
+        columns: [
+            {
+                dataField: "TraseStock_Id",
+                visible: false
+            },
+            {
+                dataField: "TradeId",
+                cellTemplate: function (container, options) {
+                    $('<a>' + options.values + '</a>').addClass('dx-link')
+                        .text(options.row.data.TradeId)
+                        .on('dxclick', function (e) {
+                            LoadTradeDetailView(options.row.data.TradeStock_Id);
+                            Bcri.Core.LoadingScreen.show();
+                        })
+                        .appendTo(container);
+                }
+            },
+            "RelatedTradeId",
+            {
+                dataField: "Date",
+                dataType: 'date'
+            },
+            "PaymentType",
+            {
+                dataField: 'Amount',
+                format: 'currency',
+                precision: 2
+            },
+            "TradeLine"
+        ],
+        scrolling: {
+            mode: "standard",
+            showScrollbar: "always" // or "onClick" | "always" | "never"
+        },
+        filterRow: {
+            visible: true,
+            applyFilter: "auto"
+        },
+        searchPanel: {
+            visible: true,
+            width: 240,
+            placeholder: "Search..."
+        },
+        headerFilter: {
+            visible: true
+        },
+        columnChooser: {
+            enabled: true
+        },
+        paging: {
+            pageSize: 10
+        },
+        pager: {
+            showPageSizeSelector: true,
+            allowedPageSizes: [5, 10, 20],
+            showInfo: true
+        },
+        groupPanel: { visible: true },
+        allowColumnReordering: true,
+        allowColumnResizing: true,
+        columnAutoWidth: true,
+        export: {
+            enabled: true,
+            fileName: "Payments"
+        }
+
+
+    });
+
+    gridHistory = $("#TradeHistorySearch").dxDataGrid({
+        columns: [
+            {
+                dataField: "Id",
+                visible: false
+            },
+            {
+                dataField: "TradeStockHeaderId",
+                visible: false
+            },
+            {
+                dataField: "IsAgreement",
+                visible: false
+            },
+            {
+                dataField: "Active",
+                visible: false
+            },
+            {
+                dataField: "TradeId",
+                cellTemplate: function (container, options) {
+                    $('<a>' + options.values + '</a>').addClass('dx-link')
+                        .text(options.row.data.TradeId)
+                        .on('dxclick', function (e) {
+                            LoadTradeDetailView(options.row.data.Id);
+                            Bcri.Core.LoadingScreen.show();
+                        })
+                        .appendTo(container);
+                }
+            },
+            "Transaction",
+            "AgreementName",
+            "RelatedTradeId",
+            {
+                dataField: "LenderRole",
+                visible: false,
+                caption: "Party Role",
+                width: 100
+
+            },
+            {
+                dataField: "Lender",
+                caption: "Party",
+                width: 100
+
+            },
+            {
+                dataField: "BorrowerRole",
+                visible: false,
+                caption: "Counterparty Role",
+                width: 100
+            },
+            {
+                dataField: "Borrower",
+                caption: "Counterparty",
+                width: 100
+            },
+            {
+                dataField: 'PrincipalAmount',
+                caption: 'Principal Amount',
+                format: 'currency',
+                precision: 2
+            },
+            {
+                dataField: "InterestEffectiveDate",
+                dataType: 'date',
+                width: 100
+            },
+            {
+                dataField: 'PurchaseAmount',
+                caption: 'Purchase Amount',
+                format: 'currency',
+                precision: 2
+            },
+            {
+                dataField: 'AccruedInterestAmount',
+                caption: 'Accrued Interest Amount',
+                format: 'currency',
+                precision: 2
+            },
+            {
+                dataField: "DocDate",
+                dataType: 'date'
+            },
+            {
+                dataField: "ValueDate",
+                dataType: 'date'
+            },
+            {
+                dataField: "MaturityDate",
+                dataType: 'date'
+            },
+            {
+                dataField: "FirstInterestPaymentDate",
+                dataType: 'date'
+            },
+            "InterestPeriod",
+            "InterestCalcBase",
+            "Coupon",
+            {
+                dataField: 'CouponFixedRate',
+                Name: 'CouponFixedRate',
+                caption: 'Coupon Fixed Rate',
+                format: 'fixedPoint',
+                precision: 2
+            },
+            {
+                dataField: "CouponSpread",
+                Name: "CouponSpread",
+                caption: 'Coupon Spread',
+                format: 'fixedPoint',
+                precision: 2
+            },
+            {
+                dataField: "FirstPrincipalPaymentDate",
+                dataType: 'date'
+            },
+            "FeeAmount",
+            "FeePayee",
+            "FeePayor",
+            {
+                dataField: "FirstFeePaymentDate",
+                dataType: 'date'
+            },
+            "FeePeriod",
+            "FeesApplicable",
+            "PrincipalPeriod",
+            "PrincipalPaymentAmount",
+
+            "Term",
+            "Position",
+            "Seniority",
+            "Security",
+            "Instrument",
+            {
+                dataField: "Party3",
+                caption: "Party 3",
+                width: 100
+            },
+
+            {
+                dataField: "Party3Role",
+                caption: "Party 3 Role",
+                width: 100
+            },
+            {
+                dataField: "LenderAffiliation",
+                caption: "Party 1 Affiliation",
+                width: 100
+            },
+            {
+                dataField: "BorrowerAffiliation",
+                caption: "Party 2 Affiliation",
+                width: 100
+            },
+            {
+                dataField: "Party3Affiliation",
+                caption: "Party 3 Affiliation",
+                width: 100
+            },
+            "FirstDocumentId",
+            "DocumentId",
+            "HasAmmended",
+            "AgreementCategory",
+            "Origin",
+            {
+                dataField: 'ALE',
+                Name: 'ALE',
+                caption: 'ALI',
+
+            },
+            "OriginalCounterParty",
+            {
+                dataField: "OriginalValueDate",
+                dataType: 'date'
+            },
+            {
+                dataField: "OriginalMaturityDate",
+                dataType: 'date'
+            },
+            "IsPrincipalPrepayable",
+            "HasDocument"
+        ],
+        scrolling: {
+            mode: "standard",
+            showScrollbar: "always" // or "onClick" | "always" | "never"
+        },
+        filterRow: {
+            visible: true,
+            applyFilter: "auto"
+        },
+        searchPanel: {
+            visible: true,
+            width: 240,
+            placeholder: "Search..."
+        }, headerFilter: {
+            visible: true
+        },
+        columnChooser: {
+            enabled: true
+        },
+        paging: {
+            pageSize: 10
+        },
+        pager: {
+            showPageSizeSelector: true,
+            allowedPageSizes: [5, 10, 20],
+            showInfo: true
+        },
+        groupPanel: { visible: true },
+        allowColumnReordering: true,
+        allowColumnResizing: true,
+        columnAutoWidth: true,
+        export: {
+            enabled: true,
+            fileName: "Trade Blotter History"
+        }
+    }).dxDataGrid("instance");
+
+
+    gridHistory.refresh();
+
+
+    $("#TradeHistorySearch").dxDataGrid("instance").resize();
+
+
+    $("#SettlementsGrid").dxDataGrid(
+        {
+
+            columns: [
+                {
+                    dataField: "Id",
+                    visible: false
+                },
+                {
+                    dataField: "TradeLine",
+                    caption: "Trade Line"
+                },
+                {
+                    dataField: "ExternalTradeId",
+                    caption: "Trade ID",
+                    //cellTemplate: function (container, options) {
+                    //    $('<a>' + options.row.data.ExternalTradeId + '</a>').addClass('dx-link')
+                    //        .text(options.row.data.ExternalTradeId)
+                    //        .on('dxclick', function (e) {
+                    //            LoadTradeDetailView(options.row.data.TradeStock_Id);
+                    //            Bcri.Core.LoadingScreen.show();
+                    //        })
+                    //        .appendTo(container);
+                    //}
+                    cellTemplate: function (container, options) {
+                        $('<a>' + options.values + '</a>').addClass('dx-link')
+                            .text(options.row.data.ExternalTradeId)
+                            .on('dxclick', function (e) {
+                                LoadTradeDetailView(options.row.data.TradeStock_Id, 0);
+                                Bcri.Core.LoadingScreen.show();
+                            })
+                            .appendTo(container);
+                    }
+
+
+                },
+                
+                {
+                    dataField: "Amount",
+                    format: {
+                        type: "currency",
+                        precision: 2
+                    }
+                },
+                {
+                    dataField: "Date",
+                    dataType: 'date'
+                },
+                "SettlementType",
+                "Action",
+                "SettlementMethod",
+                "Comment",
+                "Party",
+                {
+                    dataField: "PartyAffiliation",
+                    caption: "Party Affiliation"
+                },
+                "Counterparty",
+                {
+                    dataField: "CounterpartyAffiliation",
+                    caption: "Counterparty Affiliation"
+                },
+                {
+                    dataField: "AL",
+                    caption: "L/A"
+                },
+            ],
+            //esto previene que se despliegue mensaje "Are you sure to delete row"?
+            //https://js.devexpress.com/Documentation/ApiReference/UI_Widgets/dxDataGrid/Configuration/editing/texts/?search=confirm%20delete&version=14_2
+            editing: {
+                texts: {
+                    confirmDeleteMessage: ""
+                }
+            },
+            showBorders: true,
+            filterRow: {
+                visible: true,
+                applyFilter: "auto"
+            },
+            searchPanel: {
+                visible: true,
+                width: 240,
+                placeholder: "Search..."
+            },
+            headerFilter: {
+                visible: true
+            },
+            columnChooser: {
+                enabled: true
+            },
+            paging: {
+                pageSize: 10
+            },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [5, 10, 20],
+                showInfo: true
+            },
+            allowColumnReordering: true,
+            allowColumnResizing: true,
+            columnAutoWidth: true,
+            grouping: {
+                autoExpandAll: false
+            },
+            export: {
+                enabled: true,
+                fileName: "Settlements"
+            }
+        });
+
+
+       Bcri.Core.LoadingScreen.hide();
+});
+
+
+
+
+function LoadTradeGrid() {
+    var EntityIdSplit = $('#tradeId').val().split("-");
+    var asofdate = $("#asofdate").val();
+    var counterParty = +$('#vehicleId').val();
+    $("#tabs").hide();
+    $("#TradeDetail").hide();
+    $("#TradeBlotterGrid").dxDataGrid({ dataSource: { store: { data: [], type: 'array' } } });
+    Bcri.Core.LoadingScreen.show();
+    $.ajax({
+        url: baseUrl + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'TradeBlotterDetail',
+            ExternalTradId: EntityIdSplit[1] == "T" ? EntityIdSplit[0] : undefined,
+            Party: EntityIdSplit[1] == "V" ? EntityIdSplit[0] : undefined,
+            AsOfDate: asofdate || undefined,
+            CounterParty: counterParty || undefined
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+            $("#TradeBlotterGrid").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: data,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+            //$("#tradeBlotterLoading").hide();
+            Bcri.Core.LoadingScreen.hide();
+            $("#divTradeBlotter").show();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + " " + thrownError);
+            //$("#tradeBlotterLoading").hide();
+            Bcri.Core.LoadingScreen.hide();
+        }
+    });
+}
+
+
+function LoadTradeDetail(TradeId) {
+    LoadTradeDetailView(TradeId)
+
+    LoadTradeHistory(TradeId, asofdate);
+
+    LoadTradeDailyAcrualInterest(TradeId);
+
+    LoadPayments(TradeId);
+
+    LoadCashEvents(TradeId);
+
+    LoadSettlements(ExternalTradeIdSelected, TradeLineSelected);
+
+    d3.selectAll("svg").remove();
+    d3.selectAll(".d3-tip").remove();
+    LoadDocuments(TradeId);
+    loadTree(TradeId);
+    $("#tabsTradeDetails li").click(function () {
+        setTimeout(function () {
+            $("#CashEvent").dxDataGrid("instance").resize();
+            $("#DailyAcrualInterest").dxDataGrid("instance").resize();
+            $("#Payments").dxDataGrid("instance").resize();
+            $("#TradeHistorySearch").dxDataGrid("instance").resize();
+        }, 160);
+    });
+}
+
+function LoadTradeDetailView(TradeId, btnCreate) {
+    $(document).on({
+        ajaxStart: function () {
+            $("#modal").show();
+            $("#tabs").show();
+            $("#TradeDetail").hide();
+        },
+        ajaxStop: function () {
+            $("#overlay").hide();
+            $("#modal").hide();
+            $('#TradeDetail').show();
+            $("#tabs").show();
+            $(document).unbind('ajaxStop');
+            $(document).unbind('ajaxStart');
+            //Bcri.Core.LoadingScreen.hide();
+            initCustomPayments1();
+            CustomGridParseAll();
+            $('.ui-jqgrid-bdiv').height("55px");
+            $('.ui-jqgrid').width("290px");
+            $('#myModal').modal('show');
+            //Si existe la grilla Nonstandard ajusto el tamaño
+            if ($("table.ui-jqgrid-btable:visible").attr('id') == "NonStandardGrid") {
+                $('#NonStandardGrid').jqGrid('setGridWidth', '350');
+                $(".modal-content").css("left", "-12%");
+                $(".modal-content").addClass("modal-lg");
+            } else {
+                if ($(".modal-content").is(".modal-lg")) {
+                    $(".modal-content").removeClass("modal-lg");
+                    $(".modal-content").css("left", "");
+                }
+            }
+            setTimeout(function () {
+                Bcri.Core.LoadingScreen.hide();
+            }, 2000);
+        }
+    });
+    var urlAction = common.loaddataurl;
+    var asofdate = $("#asofdate").val();
+    if (btnCreate == undefined)
+        $('#TradeDetail').load(urlAction + '?tradeId=' + TradeId + "&asofdate=" + asofdate + "&btnCreate=" + $('input[id="checkboxdate"]:checked').length);
+    else 
+        $('#TradeDetail').load(urlAction + '?tradeId=' + TradeId + "&asofdate=" + asofdate + "&btnCreate=" + btnCreate);
+
+}       
+var DailySource = new DevExpress.data.DataSource({
+    store: data = [],
+    typr: 'array'
+});
+
+function LoadTradeDailyAcrualInterest(TradeId) {
+
+    DailySource.dispose();
+
+    $("#DailyAcrualInterest").dxDataGrid({ dataSource: DailySource });
+    $.ajax({
+        url: baseUrl + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'TradeDailyAcrualInterest',
+            TradeStock_Id: TradeId
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+            $("#DailyAcrualInterest").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: data,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + " " + thrownError);
+        }
+    });
+
+}
+
+
+var PaymentsSource = new DevExpress.data.DataSource({
+    store: data = [],
+    typr: 'array'
+});
+
+
+function LoadPayments(TradeId) {
+
+    PaymentsSource.dispose();
+
+    $("#Payments").dxDataGrid({ dataSource: PaymentsSource });
+
+    $.ajax({
+        url: baseUrl + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'TradePayments',
+            TradeStock_Id: TradeId
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+            $("#Payments").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: data,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + " " + thrownError);
+        }
+    });
+
+}
+
+
+function LoadSettlements(externalTrade_Id, TradeLine) {
+
+    $.ajax({
+        url: Bcri.Core.getDomain() + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'GetSettlementsByTradeLine',
+            ExternalTradeId: externalTrade_Id,
+            TradeLine: TradeLine
+
+        },
+        dataType: "json",
+        success: function (result) {
+            $("#SettlementsGrid").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: result,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            swal("Error", "Error while retrieving Settlements", "error");
+        }
+    });
+
+
+   
+
+}
+
+
+
+var cashEventsSource = new DevExpress.data.DataSource({
+    store: data = [],
+    typr: 'array'
+});
+
+function LoadCashEvents(TradeId) {
+
+    cashEventsSource.dispose();
+    if (!$('#tradeId').val()) return;
+    var EntityIdSplit = $('#tradeId').val().split("-");
+
+    $("#CashEvent").dxDataGrid({ dataSource: cashEventsSource });
+
+    $.ajax({
+        url: baseUrl + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'TradeCashEvents',
+            TradeStock_Id: TradeId
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+
+            data.forEach(trade => {
+                if (trade["Comment"] === "undefined" || trade["Comment"] === undefined) {
+                    trade["Comment"] = '';
+                }
+            });
+
+            $("#CashEvent").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: data,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + " " + thrownError);
+        }
+    });
+
+}
+
+function LoadTradeHistory(TradeId, asofdate) {
+
+    asOfDateHistory = asofdate;
+    if (!$('#tradeId').val()) return;
+    var EntityIdSplit = $('#tradeId').val().split("-");
+
+
+    $("#TradeHistorySearch").dxDataGrid({ dataSource: { store: { data: [], type: 'array' } } });
+
+    $.ajax({
+        url: baseUrl + "/Report/Data",
+        global: false,
+        type: "GET",
+        data: {
+            ReportCode: 'TradeBlotterHistory',
+            TradeStock_Id: TradeId
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+            var dataCpy = data.slice();
+            var actions = [];
+            var i = 0;
+            $.each(data, function (id, item) {
+                if (!item.IsAgreement) {
+                    dataCpy.splice(id - i, 1);
+                    i++;
+                    actions.push(item.Id);
+                }
+            });
+            $("#TradeHistorySearch").dxDataGrid(
+                {
+                    dataSource: {
+                        store: {
+                            data: dataCpy,
+                            type: 'array',
+                            key: 'Id'
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + " " + thrownError);
+        }
+    });
+
+}
+
+function LoadDocuments(TradeId) {
+
+    if (!$('#tradeId').val()) return;
+    var EntityIdSplit = $('#tradeId').val().split("-");
+    $("#tradeFileLoading").show();
+    $("#dashBoardFile").hide();
+    $.ajax({
+        url: baseUrl + "/SearchTradeDetails/GetDocumentsTree",
+        global: false,
+        type: "GET",
+        data: {
+            id: TradeId,
+        },
+        dataType: "json",
+        async: true,
+        success: function (data) {
+            if (data.length > 0) {
+                //$("#progressBarFile").hide();
+                $("#tradeFileLoading").hide();
+                $("#dashBoardFile").show();
+                renderTreeFile(data[0]);
+
+
+            } else {
+                if (data.Redirect) {
+                    window.location = data.Redirect;
+                } else {
+                    $("#tradeFileLoading").hide();
+                    $("#dashBoardFile").hide();
+
+                    alert("No data available.");
+                }
+            }
+
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            $("#tradeFileLoading").hide();
+            $("#dashBoardFile").hide();
+
+            //console.error(textStatus + " - " + errorThrown);
+            //alert("Could not perform the requested operation.");
+
+            swal("Error!", "Trade Tree Data error, if error persist contact System Administrator", "error",
+                {
+                    buttons: {
+                        cancel: "Exit",
+                    },
+                });
+            $(".swal-text").css("text-align", "center");
+
+
+            return;
+        }
+    });
+}
+
+function loadTree(id) {
+
+    $("#progressBar").hide();
+    $("#dashBoard").hide();
+    id = parseInt(id);
+    if (!id) return;
+
+    $("#progressBar").show();
+
+    $.getJSON(urlBase + '/TradeTree/Data/' + id, function (data) {
+        if (data.length > 0) {
+            $("#progressBar").hide();
+            $("#dashBoard").show();
+
+            renderTree(data[0]);
+        } else {
+            if (data.Redirect) {
+                window.location = data.Redirect;
+            } else {
+                $("#progressBar").hide();
+                $("#dashBoard").hide();
+
+                alert("No data available.");
+            }
+        }
+    }).fail(function (jqXhr, textStatus, errorThrown) {
+        $("#progressBar").hide();
+        $("#dashBoard").hide();
+
+        console.error(textStatus + " - " + errorThrown);
+        //alert("Could not perform the requested operation.");
+
+        swal("Error!", "Trade Tree Data error, if error persist contact System Administrator", "error",
+            {
+                buttons: {
+                    cancel: "Exit",
+                },
+            });
+        $(".swal-text").css("text-align", "center");
+
+        Bcri.Core.LoadingScreen.hide();
+        return;
+    });
+}
+function renderTree(data) {
+    removeNulls(data);
+    return d3.treeLayout(data);
+}
+function renderTreeFile(data) {
+    removeNulls(data);
+    return d3.treeLayoutFile(data);
+}
+
+function findNode(id, currentNode) {
+    var i,
+        currentChild,
+        result;
+
+    if (id === currentNode.id) {
+        return currentNode;
+    } else {
+
+        // Use a for loop instead of forEach to avoid nested functions
+        // Otherwise "return" will not work properly
+        for (i = 0; i < currentNode.children.length; i += 1) {
+            currentChild = currentNode.children[i];
+
+            // Search in the current child
+            result = findNode(id, currentChild);
+
+            // Return the result if the node has been found
+            if (result !== false) {
+                return result;
+            }
+        }
+
+        // The node has not been found and we have no more options
+        return false;
+    }
+}
+function removeNulls(obj) {
+    // Compact arrays with null entries; delete keys from objects with null value
+    var isArray = obj instanceof Array;
+    for (var k in obj) {
+        if (obj.hasOwnProperty(k)) {
+            if (obj[k] === "") isArray ? obj.splice(k, 1) : delete obj[k];
+            else if (typeof obj[k] == "object") removeNulls(obj[k]);
+        }
+    }
+}
