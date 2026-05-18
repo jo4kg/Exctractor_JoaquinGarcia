@@ -1,0 +1,468 @@
+
+
+    var Bcri = new Object();
+    baseUrl =  'https://pmp.abscapco.com/PMP';
+    baseUrl =  baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+    urlBase = baseUrl;
+    res = {};
+    cultureGlobal = "";
+    lastAccess = 0
+    culture = $('html')[0].lang;
+    cultureShort = culture.substring(0, 2);
+    currency = "USD"
+
+	//Obtencion de Recursos desde BD
+	function loadResources(culture) {
+		$.ajax({
+			url: baseUrl + "/Report/Data",
+			data: {
+				ReportCode: 'GetResByFilter',
+				Culture: culture
+			},
+			async: false,
+			cache: true,
+			success: function (data) {
+				for (var i = 0; i < data.length; i++) {
+					res[data[i].Name] = data[i].Value;
+				}
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+				console.error(xhr.status + ' ' + thrownError);
+			}
+
+		});
+
+        if (localStorage) {
+            localStorage.setItem("resources", JSON.stringify(res));
+        }
+    }
+
+    (function () {
+        'use strict';
+
+        Bcri = {
+            Settings: {
+                allowDoubleTab: true,
+                allowDoubleSession: true,
+                allowUrlNavigation: true,
+                loadingScreenOnJqAjax: false,
+            },
+            Core: {
+                getDomain: function() {
+                    var url = 'https://pmp.abscapco.com/PMP';
+                    return url.endsWith('/') ? url : url + '/';
+				},
+				Ajax: {
+					send: function (options) {
+						var blockWrapper = $('#block-wrapper');
+						var defaults = {
+							async: true,
+							beforeSend: function () { },
+							complete: function () { },
+							data: null,
+							useWrapper: true,
+							success: function () { },
+							url: '',
+						}
+						$.extend(true, defaults, options);
+						$.ajax({
+							async: defaults.async,
+							beforeSend: function (jqXHR, settings) {
+								defaults.beforeSend();
+								if (defaults.useWrapper) {
+									blockWrapper.show();
+								}
+							},
+							complete: function (jqXHR, textStatus) {
+								defaults.complete(jqXHR, textStatus);
+								if (defaults.useWrapper) {
+									blockWrapper.hide();
+								}
+							},
+							data: defaults.data,
+							success: function (data, textStatus, jqXHR) {
+								defaults.success(data, textStatus, jqXHR);
+							},
+							url: defaults.url,
+						});
+					}
+				},
+                LoadingScreen: {
+                    show: function () {
+                        $("#block-wrapper").show();
+                    },
+                    hide: function () {
+                        $("#block-wrapper").hide();
+                    }
+                }
+            }
+        }
+    })();
+
+    function validateLocalStorageGlobalize() {
+        if (localStorage) {
+            var currentCulture = JSON.parse(localStorage.getItem("globalizeData"));
+            return currentCulture && (currentCulture.cultureName === culture || currentCulture.cultureName === cultureShort);
+        }
+        else
+            return false;
+    }
+
+    if (validateLocalStorageGlobalize()) {
+        var currentCulture = JSON.parse(localStorage.getItem("globalizeData"));
+        $.when().then(function () {
+            return currentCulture.globalizeArray;
+        }).then(Globalize.load).then(function () {
+            Globalize.locale(culture);
+
+            var defaultFormatter = Globalize.formatCurrency;
+            var defaultCurrency = currency;//Toma la moneda establecida en el web.config(o por defecto USD)
+            Globalize.formatCurrency = function (value, obj, curr = defaultCurrency) {
+                return defaultFormatter.call(Globalize, value, curr || defaultCurrency, obj);
+            }
+        });
+    }
+    else {
+        $.when(
+            $.getJSON(baseUrl + "/Scripts/cldr-data/main/" + culture + "/ca-gregorian.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/main/" + culture + "/numbers.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/main/" + culture + "/currencies.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/supplemental/likelySubtags.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/supplemental/timeData.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/supplemental/weekData.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/supplemental/currencyData.json"),
+            $.getJSON(baseUrl + "/Scripts/cldr-data/supplemental/numberingSystems.json")
+        ).then(function () {
+            //Convertimos todos los JSON a un unico array
+            var globalizeArray = [].slice.apply(arguments, [0]).map(function (result) {
+                return result[0];
+            });
+            if (localStorage) {
+                //si o si borramos para tener una manera simple de refrescar el globalize en caso de que haya cambiado 
+                //la cultura o algun contenido de los archivos de datos
+                localStorage.removeItem("globalizeData");
+                localStorage.setItem("globalizeData", JSON.stringify({ cultureName: culture, "globalizeArray": globalizeArray }));
+            }
+
+            return globalizeArray;
+        }).then(
+            Globalize.load //Cargamos los datos en cada item del array al Globalize
+        ).then(function () {
+            //lenguaje
+
+            Globalize.locale(culture);
+
+            var defaultFormatter = Globalize.formatCurrency;
+            var defaultCurrency = currency;//Toma la moneda establecida en el web.config(o por defecto USD)
+            Globalize.formatCurrency = function (value, obj, curr = defaultCurrency) {
+                return defaultFormatter.call(Globalize, value, curr || defaultCurrency, obj);
+            }
+        })
+    }
+
+
+
+
+    $(document).ready(function () {
+        InitForm(document);
+    });
+
+
+    function InitForm(context) {
+        //context = (context === undefined ? $(document) : $(context))
+        if (localStorage && localStorage.getItem("resources")) {
+            res = JSON.parse(localStorage.getItem("resources"));
+        } else {
+            loadResources(cultureShort);
+        }
+
+        moment.locale(cultureShort);
+
+        //se inicializa aca la cultura del datepicker porque no usa el globalize y
+        //si se hace con todos los otros idiomas por los callbacks se carga antes el ready del index que esto
+        $.datepicker.setDefaults($.datepicker.regional[culture] //si no tiene larga "es-AR"
+            || $.datepicker.regional[cultureShort] //pruebo con la corta "es"
+            || $.datepicker.regional["en-US"]); //si no va default en ingles
+
+        //configuracion de moneda por defecto de las grillas y graficos de DevExpress(se toma del web.config o por defecto es USD)
+        DevExpress.config({ defaultCurrency: currency })
+
+        if (typeof context === "undefined")
+            context = document;
+
+        //Initialise any Select Multiselct
+        $('select[multiple=multiple]', context).multiselect();
+
+
+        //Initialise any date pickers
+        $.datepicker.setDefaults({
+            changeMonth: true,
+            changeYear: true
+        });
+        $('.datepicker', context).datepicker({onSelect: function (inp,inst) {
+            $("#" + inst.id).trigger('change');
+        }});
+        $('.datepicker', context).attr('maxlength', 10);
+        $('.datepicker' ,context).datepicker( "option", "yearRange", "2000:2350" );
+
+
+        //Initialise PlaceHolder for select
+
+        var selects = $('select[placeholder]', context);
+
+        for (var i = 0; i < selects.length; i++) {
+            setPlaceHolder(selects[i]);
+        }
+        selects.change(function () {
+            setPlaceHolder(this);
+        });
+
+        function setPlaceHolder(elem) {
+            var $elem = $(elem);
+            var firstChild = $elem.children('option:first-child');
+            if (firstChild.is(':selected') && firstChild.text() === "") {
+
+                firstChild.attr('disabled', '').html($elem.attr("placeholder"));
+                $elem.addClass('placeholder');
+            } else {
+                $elem.removeClass('placeholder');
+            }
+        }
+
+        $('form', context).each(function () {
+            $.validator.unobtrusive.parse($(this));
+        });
+        if ($(context).is('form'))
+            $.validator.unobtrusive.parse($(context));
+    }
+
+
+
+    //configure jquery validate unotrucive for bootstrap styles
+    jQuery.validator.setDefaults({
+        highlight: function (element, errorClass, validClass) {
+            if (element.type === 'radio') {
+                this.findByName(element.name).addClass(errorClass).removeClass(validClass);
+            } else {
+                $(element).addClass(errorClass).removeClass(validClass);
+                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+            }
+        },
+        unhighlight: function (element, errorClass, validClass) {
+            if (element.type === 'radio') {
+                this.findByName(element.name).removeClass(errorClass).addClass(validClass);
+            } else {
+                $(element).removeClass(errorClass).addClass(validClass);
+                $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        }
+    });
+    $(function () {
+
+        $("span.field-validation-valid, span.field-validation-error").addClass('help-block');
+        $("div.form-group").has("span.field-validation-error").addClass('has-error');
+        $("div.validation-summary-errors").has("li:visible").addClass("alert alert-block alert-danger");
+
+    });
+    $.fn.clearValidation = function() {
+        var v = $(this).validate();
+        $('[name]', this).each(function() {
+            v.successList.push(this);
+            v.showErrors();
+        });
+        v.resetForm();
+        v.reset();
+        $(this).find("label.error").hide();
+        $(this).find(".error").removeClass("error");
+        $(this).find(".has-error").removeClass("has-error");
+    };
+    //used:
+
+
+
+    $(showAlerts);
+    function showAlerts() {
+        var countalerts = $('[data-countalerts]').attr('data-countalerts');
+        if (countalerts != undefined) {
+            //if (countalerts == 0)
+            //    $("#menualerts").hide();
+            $('[data-toggle="popover"]').attr('data-content', countalerts);
+            $('[data-toggle="popover"]').popover('show');
+        } else
+            $("#Alerts").css("visibility", "hidden");
+    }
+
+
+
+    //inicializacion jqgrid
+    $(function () {
+        $.jgrid.defaults.responsive = true;
+        $.jgrid.defaults.autowidth = true;
+        $.jgrid.defaults.width = 780;
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $.jgrid.styleUI.Bootstrap.base.rowTable = "table table-bordered table-condensed";
+        $.jgrid.defaults.height = 300;
+        $.jgrid.defaults.rowNum = 20;
+
+
+        $(".collape-button i").click(function () { // cuando contrae el menu lateral
+            var grids = $(".ui-jqgrid-htable");
+            $.each(grids, function (i) {
+                $(grids[i]).trigger("resize");
+            });
+        });
+
+        $("a[data-toggle=\"tab\"]").on("click", function (e) { // cuando se cambia de tab
+            var grids = $($(this).attr('href')).find(".ui-jqgrid-htable");
+            $.each(grids, function (i) {
+                $(grids[i]).trigger("resize");
+            });
+        });
+        //para cambiar el idioma
+    });
+
+    //para validar registros duplicado en la jqgrid por Name, Code, etc
+    function isDuplicateInGrid(postData, column, grid) {
+
+        grid = $(grid);
+        var id = postData[grid.attr("Id") + "_id"];
+        var value = postData[column].toLowerCase().trim();
+
+        var allData = grid.jqGrid("getGridParam", "data");
+
+        for (var i = 0; i < allData.length; i++) {
+            if (allData[i][column].toLowerCase().trim() === value && id != allData[i].Id)
+                return true;
+        }
+        return false;
+    }
+
+    //Loads the correct sidebar on window load,
+    //collapses the sidebar on window resize.
+    // Sets the min-height of #page-wrapper to window size
+    $(function () {
+        $("#side-menu").metisMenu();
+
+        $(".collape-button i").click(function () {
+            $("#page-wrapper").toggleClass("page-wrapper-collapse");
+            $(".sidebar").toggleClass("sidebar-collapse");
+            $(".collape-button i:nth-child(1)").toggleClass("collapse-button-none");
+        });
+        $(".collape-button i").hover(function () {
+            $(this).css("cursor", "pointer");
+        });
+
+        $(".navbar-toggle").click(function () {
+            $(".sidebar").toggle(500);
+        });
+
+        $("#languageSelector").click(function (event) {
+            event.stopPropagation();
+        });
+
+        $("#languageSelector").change(function () {
+            if ($(this).val()) {
+                $.get(Bcri.Core.getDomain() + "/Language/Change?culture=" + $(this).val(), function () {
+                    location.reload();
+                });
+            }
+        });
+
+        $(window).bind("load resize", function () {
+            topOffset = 50;
+            width = (this.window.innerWidth > 0) ? this.window.innerWidth : this.screen.width;
+            if (width < 768) {
+                $("div.navbar-collapse").addClass("collapse");
+                topOffset = 100; // 2-row-menu
+            } else {
+                $("div.navbar-collapse").removeClass("collapse");
+                $(".sidebar").show(500);
+            }
+
+            height = ((this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height) - 1;
+            height = height - topOffset;
+            if (height < 1) height = 1;
+        });
+
+        var url = window.location;
+        $("ul#side-menu a:not([href='#'])").on("click", function (e) {
+            e.preventDefault(); //para registrar la navegacion en el log y confirmar los permisos
+            window.location = $(this).data("navigation");
+        });
+
+        var element = $("#side-menu.nav a:not([href='#']").filter(function () {
+            var href = this.href.replace("#", "");
+            return $(this).data("accessid") == lastAccess;
+        }).addClass("active");
+
+        var breakControl = 20; //como es una funcion recursiva, si surge algun problema, corto a los 20 ciclos
+        var func_ExpandParent = function (elmn) {
+            breakControl--;
+            if (breakControl < 0) { debugger; return; } //evitar un loop infinito
+            if (elmn.is("ul.nav") && !(elmn.is("ul#side-menu.nav"))) {
+                elmn.addClass("in");
+                var parent = elmn.parent();
+                if (parent.is("li")) {
+                    parent.addClass("active");
+                }
+                parent = parent.parent();
+                if (parent.is("ul")) {
+                    func_ExpandParent(parent);
+                }
+            }
+        }
+
+        func_ExpandParent(element.parent().parent());
+
+    });
+
+
+    //alert in page para mensajes cortos
+    $.fn.showAlert = function (msg, severity, autoCloseMs) {
+        if (severity === undefined) severity = "success";
+        if (severity == "error") severity = "danger";
+        if (autoCloseMs === undefined)
+            autoCloseMs = (severity == "danger") ? 10000 : 4000;
+
+        this.html("<div class=\"alert alert-" + severity + " alert-dismissable fade in\"><button type=\"button\" data-dismiss=\"alert\" class=\"close\">x</button>" + msg + "</div>");
+
+        window.setTimeout(function () {
+            this.children().fadeTo(500, 0).slideUp(500, function () {
+                $(this).html("");
+            });
+        }.bind(this), autoCloseMs);
+    };
+
+
+    //no se, algo de la pagina de busuqeda? ver si se puede eliminar
+    $.fn.searcher = function (url) {
+        var found;
+        $.ajax({
+            type: "POST",
+            url: url,
+            success: function (data) {
+                /**
+                 *  We form the structure of the table to return
+                 */
+                var bigHtml = "<table width=\"100%\" class=\"table table-bordered table-hover dataTable no-footer dtr-inline\"  style=\"width: 20%; border-top: none;border-right: none\">"
+                                 + "<thead></thead><tbody>";
+                var array = $.parseJSON(data).toString().split(",");
+                for (var i = 0; i < array.length ; i++) {
+                    bigHtml += "<tr class=\"gradeA even\" role=\"row\" id=\"" + array[i] + "\">" +
+                        "<td class=\"sorting_1\">" + array[i] + "</td>" +
+                        "</tr>";
+                }
+                bigHtml += "</tbody></table>";
+                $("#Title").append(bigHtml);
+            }
+        });
+    };
+
+    $.ajaxSetup({
+        error: function (x, status, error) {
+            if (x.status == 403) {
+                window.location.href = "/Out/SessionExpired";
+            }
+        }
+    });
+

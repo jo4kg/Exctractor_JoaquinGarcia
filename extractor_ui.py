@@ -15,7 +15,7 @@ from playwright.async_api import async_playwright
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION       = "1.3.0"
+VERSION       = "1.4.0"
 AUTHOR        = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"
@@ -435,14 +435,15 @@ class App:
     # ── TRADE LIST ───────────────────────────────────────────
 
     def _cargar_trades(self, ids):
-        """Inicializa la lista de trades con estado Pendiente."""
+        """Inicializa la lista verificando archivos reales en la carpeta de descarga."""
         self.all_ids = ids
         self.trades_estado = {id_: ESTADO_PENDIENTE for id_ in ids}
-        # Marcar ya procesados
-        if Path(PROGRESO_PATH).exists():
-            procesados = set(Path(PROGRESO_PATH).read_text().strip().splitlines())
-            for id_ in procesados:
-                if id_ in self.trades_estado:
+        # Verificar qué IDs ya tienen archivo en la carpeta de destino
+        carpeta = Path(self.carpeta_dest.get())
+        if carpeta.exists():
+            archivos = [f.name for f in carpeta.iterdir() if f.is_file()]
+            for id_ in ids:
+                if any(id_ in nombre for nombre in archivos):
                     self.trades_estado[id_] = ESTADO_OK
         self._refresh_list()
 
@@ -599,12 +600,18 @@ class App:
         # Cargar lista
         self.root.after(0, lambda: self._cargar_trades(ids))
 
-        ya_procesados = set()
-        if Path(PROGRESO_PATH).exists():
-            ya_procesados = set(Path(PROGRESO_PATH).read_text().strip().splitlines())
-            self._log(f"   → {len(ya_procesados)} ya procesados, continuando...", "info")
+        # Verificar qué IDs ya tienen archivo descargado en la carpeta destino
+        carpeta_check = Path(self.carpeta_dest.get())
+        ya_descargados = set()
+        if carpeta_check.exists():
+            archivos_existentes = [f.name for f in carpeta_check.iterdir() if f.is_file()]
+            for id_ in ids:
+                if any(id_ in nombre for nombre in archivos_existentes):
+                    ya_descargados.add(id_)
+        if ya_descargados:
+            self._log(f"   → {len(ya_descargados)} ya tienen archivo en la carpeta, se saltean...", "info")
 
-        ids_pendientes = [id_ for id_ in ids if id_ not in ya_procesados]
+        ids_pendientes = [id_ for id_ in ids if id_ not in ya_descargados]
         total = len(ids_pendientes)
         self._log(f"   → {total} pendientes\n", "info")
         resultados = []
@@ -651,8 +658,7 @@ class App:
                         archivos, estado = await self._procesar_trade(page, trade_id, carpeta)
                         resultados.append({"ID": trade_id, "Estado": estado, "Archivos": archivos})
                         self._set_estado(trade_id, estado)
-                        with open(PROGRESO_PATH, "a") as f:
-                            f.write(f"{trade_id}\n")
+                        # Progreso basado en archivos reales, no txt
                         exito = True
                         break
                     except Exception as e:
