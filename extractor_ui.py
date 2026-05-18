@@ -22,7 +22,7 @@ except ImportError:
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION       = "1.7.1"
+VERSION       = "1.7.2"
 AUTHOR        = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"
@@ -116,7 +116,120 @@ THEMES = {
         "tag_nofile":   "#b07d10",
         "tag_error":    "#c0392b",
         "tag_active":   "#3b6fd4",
-    }
+    },
+    "bordo": {
+        "bg":           "#1a0a0d",
+        "bg2":          "#2b1018",
+        "bg3":          "#110508",
+        "bg_panel":     "#221018",
+        "fg":           "#f0d8dc",
+        "fg2":          "#a06070",
+        "fg_label":     "#d4a0a8",
+        "accent":       "#e05070",
+        "ok":           "#a0c878",
+        "error":        "#ff6060",
+        "warning":      "#e8b060",
+        "info":         "#e05070",
+        "btn_start_bg": "#3a6030",
+        "btn_start_fg": "#ffffff",
+        "btn_pause_bg": "#8a5010",
+        "btn_pause_fg": "#ffffff",
+        "btn_stop_bg":  "#7a1020",
+        "btn_stop_fg":  "#ffffff",
+        "btn_misc_bg":  "#2b1018",
+        "btn_misc_fg":  "#d4a0a8",
+        "btn_acc_bg":   "#7a2030",
+        "btn_acc_fg":   "#ffffff",
+        "progress":     "#e05070",
+        "trough":       "#2b1018",
+        "border":       "#4a2030",
+        "theme_btn_fg": "#a06070",
+        "list_sel":     "#4a1828",
+        "list_hover":   "#221018",
+        "tag_pending":  "#a06070",
+        "tag_ok":       "#a0c878",
+        "tag_nofile":   "#e8b060",
+        "tag_error":    "#ff6060",
+        "tag_active":   "#e05070",
+    },
+    "verde": {
+        "bg":           "#0a1a0f",
+        "bg2":          "#102018",
+        "bg3":          "#061008",
+        "bg_panel":     "#0e1a12",
+        "fg":           "#d0f0d8",
+        "fg2":          "#5a8a68",
+        "fg_label":     "#90c8a0",
+        "accent":       "#40b060",
+        "ok":           "#70d080",
+        "error":        "#e06060",
+        "warning":      "#c8a030",
+        "info":         "#40b060",
+        "btn_start_bg": "#1a5a28",
+        "btn_start_fg": "#ffffff",
+        "btn_pause_bg": "#7a6010",
+        "btn_pause_fg": "#ffffff",
+        "btn_stop_bg":  "#6a1818",
+        "btn_stop_fg":  "#ffffff",
+        "btn_misc_bg":  "#102018",
+        "btn_misc_fg":  "#90c8a0",
+        "btn_acc_bg":   "#1a6030",
+        "btn_acc_fg":   "#ffffff",
+        "progress":     "#40b060",
+        "trough":       "#102018",
+        "border":       "#204830",
+        "theme_btn_fg": "#5a8a68",
+        "list_sel":     "#1a4828",
+        "list_hover":   "#0e1a12",
+        "tag_pending":  "#5a8a68",
+        "tag_ok":       "#70d080",
+        "tag_nofile":   "#c8a030",
+        "tag_error":    "#e06060",
+        "tag_active":   "#40b060",
+    },
+    "marron": {
+        "bg":           "#1a1208",
+        "bg2":          "#271a0c",
+        "bg3":          "#110c04",
+        "bg_panel":     "#201408",
+        "fg":           "#f0e0c8",
+        "fg2":          "#907050",
+        "fg_label":     "#c8a878",
+        "accent":       "#c88040",
+        "ok":           "#90c060",
+        "error":        "#e06060",
+        "warning":      "#e8b040",
+        "info":         "#c88040",
+        "btn_start_bg": "#285020",
+        "btn_start_fg": "#ffffff",
+        "btn_pause_bg": "#806020",
+        "btn_pause_fg": "#ffffff",
+        "btn_stop_bg":  "#702018",
+        "btn_stop_fg":  "#ffffff",
+        "btn_misc_bg":  "#271a0c",
+        "btn_misc_fg":  "#c8a878",
+        "btn_acc_bg":   "#804820",
+        "btn_acc_fg":   "#ffffff",
+        "progress":     "#c88040",
+        "trough":       "#271a0c",
+        "border":       "#503818",
+        "theme_btn_fg": "#907050",
+        "list_sel":     "#4a3018",
+        "list_hover":   "#201408",
+        "tag_pending":  "#907050",
+        "tag_ok":       "#90c060",
+        "tag_nofile":   "#e8b040",
+        "tag_error":    "#e06060",
+        "tag_active":   "#c88040",
+    },
+}
+
+THEME_LABELS = {
+    "dark":   "🌑 Oscuro",
+    "light":  "☀️ Claro",
+    "bordo":  "🍷 Bordo",
+    "verde":  "🌿 Verde",
+    "marron": "🪵 Marrón",
 }
 
 STATUS_ICONS = {
@@ -145,7 +258,7 @@ class App:
         self.paused       = False
         self._pause_event = threading.Event()
         self._pause_event.set()
-        self.theme_name   = "dark"
+        self.theme_name   = cfg.get("theme", "dark")
 
         # Trade list: {trade_id: estado}
         self.trades_estado = {}
@@ -186,11 +299,19 @@ class App:
         self.lbl_sub.pack(anchor="w")
 
         # Botón tema derecha
-        self.btn_theme = tk.Button(self.header, text="☀️  Modo claro",
-                                   font=("Segoe UI", 9), relief="flat",
-                                   cursor="hand2", bd=0,
-                                   command=self._toggle_theme)
-        self.btn_theme.grid(row=0, column=2, sticky="e", padx=16)
+        theme_frame = tk.Frame(self.header)
+        theme_frame.grid(row=0, column=2, sticky="e", padx=16)
+        self.theme_frame = theme_frame
+
+        self.theme_buttons = {}
+        for t_name in ["dark", "light", "bordo", "verde", "marron"]:
+            btn = tk.Button(theme_frame,
+                            text=THEME_LABELS[t_name],
+                            font=("Segoe UI", 8), relief="flat",
+                            cursor="hand2", bd=0, padx=8, pady=4,
+                            command=lambda n=t_name: self._set_theme(n))
+            btn.pack(side="left", padx=2)
+            self.theme_buttons[t_name] = btn
 
         # Título centro (invisible, solo para balance)
         self.lbl_title = tk.Label(self.header, text="",
@@ -514,9 +635,10 @@ class App:
 
     # ── THEME ────────────────────────────────────────────────
 
-    def _toggle_theme(self):
-        self.theme_name = "light" if self.theme_name == "dark" else "dark"
+    def _set_theme(self, name):
+        self.theme_name = name
         self._apply_theme()
+        self._save_config()
 
     def _apply_theme(self):
         t = THEMES[self.theme_name]
@@ -539,9 +661,15 @@ class App:
         self.lbl_brand.configure(bg=t["bg2"], fg=t["fg"])
         self.lbl_sub.configure(bg=t["bg2"], fg=t["fg2"])
         self.lbl_title.configure(bg=t["bg2"], fg=t["fg"])
-        self.btn_theme.configure(bg=t["bg2"], fg=t["theme_btn_fg"],
-                                 activebackground=t["bg2"],
-                                 activeforeground=t["fg"], text=icon)
+        self.theme_frame.configure(bg=t["bg2"])
+        for name, btn in self.theme_buttons.items():
+            is_active = name == self.theme_name
+            btn.configure(
+                bg=t["accent"] if is_active else t["bg2"],
+                fg=t["bg"] if is_active else t["theme_btn_fg"],
+                activebackground=t["accent"] if is_active else t["bg2"],
+                activeforeground=t["bg"],
+            )
 
         # Left panel
         self.left.configure(bg=t["bg"])
@@ -705,6 +833,7 @@ class App:
             cfg = {
                 "excel_path":   self.excel_path.get(),
                 "carpeta_dest": self.carpeta_dest.get(),
+                "theme":        self.theme_name,
             }
             Path(CONFIG_PATH).write_text(json.dumps(cfg, indent=2))
         except Exception:
