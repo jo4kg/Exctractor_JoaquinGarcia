@@ -10,19 +10,27 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from playwright.async_api import async_playwright
+import json
+import os
 
 # ============================================================
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION       = "1.4.0"
-AUTHOR        = "Joaquín García²"
+VERSION = "1.5.0"
+AUTHOR  = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"
 BASE_URL      = "https://pmp.abscapco.com"
 COLUMNA_IDS   = "TradeId"
-SESION_DIR    = r"C:\Users\JoaquinGarciaAiello\Desktop\Repository\chrome_session"
-PROGRESO_PATH = "progreso.txt"
+
+# Rutas dinámicas — funcionan en cualquier PC
+APP_DIR       = Path(os.path.dirname(os.path.abspath(__file__)))
+SESION_DIR    = str(APP_DIR / "chrome_session")
+PROGRESO_PATH = str(APP_DIR / "progreso.txt")
+CONFIG_PATH   = str(APP_DIR / "config.json")
+DEFAULT_DEST  = str(Path.home() / "Desktop" / "PDF_Trades")
+
 MAX_REINTENTOS = 3
 
 # Estados posibles
@@ -123,8 +131,10 @@ class App:
         self.root.minsize(800, 500)
         self.root.resizable(True, True)
 
-        self.excel_path   = tk.StringVar(value="")
-        self.carpeta_dest = tk.StringVar(value=r"C:\Users\JoaquinGarciaAiello\Desktop\PDF_Trades")
+        # Cargar config guardada
+        cfg = self._load_config()
+        self.excel_path   = tk.StringVar(value=cfg.get("excel_path", ""))
+        self.carpeta_dest = tk.StringVar(value=cfg.get("carpeta_dest", DEFAULT_DEST))
         self.search_var   = tk.StringVar()
         self.running      = False
         self.paused       = False
@@ -485,6 +495,24 @@ class App:
 
     # ── HELPERS ──────────────────────────────────────────────
 
+    def _load_config(self):
+        try:
+            if Path(CONFIG_PATH).exists():
+                return json.loads(Path(CONFIG_PATH).read_text())
+        except Exception:
+            pass
+        return {}
+
+    def _save_config(self):
+        try:
+            cfg = {
+                "excel_path":   self.excel_path.get(),
+                "carpeta_dest": self.carpeta_dest.get(),
+            }
+            Path(CONFIG_PATH).write_text(json.dumps(cfg, indent=2))
+        except Exception:
+            pass
+
     def _seleccionar_excel(self):
         path = filedialog.askopenfilename(
             title="Seleccionar Excel con IDs",
@@ -492,11 +520,13 @@ class App:
         )
         if path:
             self.excel_path.set(path)
+            self._save_config()
 
     def _seleccionar_carpeta(self):
         path = filedialog.askdirectory(title="Seleccionar carpeta de descarga")
         if path:
             self.carpeta_dest.set(path)
+            self._save_config()
 
     def _limpiar_log(self):
         self.log.config(state="normal")
