@@ -22,7 +22,7 @@ except ImportError:
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION       = "1.7.0"
+VERSION       = "1.7.1"
 AUTHOR        = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"

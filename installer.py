@@ -12,7 +12,7 @@ import threading
 import importlib.util
 import os
 
-VERSION = "1.7.0"
+VERSION = "1.7.1"
 AUTHOR  = "Joaquín García²"
 
 STEPS = [
