@@ -1,0 +1,465 @@
+<style>
+
+    .interLine {
+        height: 16.67px;
+    }
+
+    .line {
+        border-top: 1px solid #8c8b8b;
+        margin-top: -5px;
+    }
+
+    .sectionLine {
+        border-top: 1px solid #8c8b8b;
+        margin-top: -5px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .btnalike {
+        background-color: #497aab;
+        height: 25px;
+        font-size: 12px;
+        color: white;
+        border: 1px solid lightgrey;
+        cursor: default;
+        border-radius: 4px;
+        padding: 1px 10px;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .absfont {
+        font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    .modal {
+        overflow: auto !important;
+    }
+
+    .modal-title {
+        font-size: 26px;
+    }
+</style>
+
+
+
+<div class="modal-body absfont" id="modalbody" style="min-height: 550px; border-radius: 20px">
+
+    
+
+    <div id="loadingBox" hidden class="sk-loading .ibox-content">
+
+        <div class="spiner-example">
+
+            <div class="sk-spinner sk-spinner-cube-grid">
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+                <div class="sk-cube"></div>
+            </div>
+            <br />
+            <center>Loading... Please wait.</center>
+        </div>
+
+
+    </div>
+    <div class="row" id="TradeDetail">
+        <div>
+            <center>
+                <h3 class="modal-title" style="min-height:25px; margin-bottom: 15px; margin-top: -15px;">
+                    <strong>
+                        Trade
+                        T122629-01 -
+                        New Trade
+                    </strong>
+                </h3>
+            </center>
+            <p></p>
+        </div>
+
+        <div class="col-sm-12">
+            <div class="row" style="padding-bottom: 10px;">
+                <center>
+                </center>
+            </div>
+        </div>
+        <p class="line"></p>
+
+
+        <!-- button-->
+
+
+        <input id="ExternalTradeId" name="ExternalTradeId" type="hidden" value="T122629-01" />
+
+        <!-- Transaction Details-->
+
+        <div id="TradeDetails" style="margin-top:-30px;">
+
+            <div class="col-sm-6" style="height: 16.67px;">
+                <ul>
+                    <fieldset id="AgreementField" style="display: block; margin-left: -15px;">
+                        <li class="interLine">
+                            <strong>Agreement: </strong>
+                            <span>Loan</span>
+                        </li>
+                    </fieldset>
+                </ul>
+            </div>
+
+            <div class="col-sm-6" style="height: 16.67px;">
+            </div>
+
+
+
+            <div class="col-sm-6">
+                <div class="row">
+                    <ul>
+                        <fieldset id="TradeIdField" style="display: none;">
+                            <li class="interLine">
+                                <strong>Trade Id: </strong>
+                                <span>106375</span>
+                            </li>
+                        </fieldset>
+
+                        <fieldset id="LenderField" style="display: block;">
+                            <li>
+                                <strong>Lender: </strong>
+                                <span>Coal Asset Holding LLC</span>
+                            </li>
+                        </fieldset>
+
+                            <fieldset id="PositionField" style="display: block;">
+                                <fieldset id="PositionField" style="display: block;">
+                                    <strong>
+
+                                            <span>Asset</span>
+                                                <span> &nbsp; | &nbsp; </span>
+                                            <span>Unsecured</span>
+                                                <span> &nbsp; | &nbsp; </span>
+                                            <span>Senior</span>
+
+
+                                    </strong>
+                                </fieldset>
+
+
+
+                            </fieldset>
+
+
+
+                        <fieldset id="CurrentPositionField" style="display: block;">
+                            <li class="interLine">
+                                <strong>Current Principal: </strong>
+                                <span>$645,262.00</span>
+                            </li>
+                        </fieldset>
+
+
+                        <fieldset id="Party3Field" style="display: block;">
+                            <li class="interLine">
+                                    <strong>Party 3: </strong>
+
+                                <span></span>
+                            </li>
+                        </fieldset>
+
+                    </ul>
+                </div>
+            </div> <!--col-->
+            <div class="col-sm-6">
+                <div class="row">
+                    <ul>
+
+
+                        <fieldset id="BorrowerField" style="display: block;">
+                            <li>
+                                <strong>Borrower:  </strong>
+                                <span>Azurite Asset Holding LLC</span>
+                            </li>
+                        </fieldset>
+                        <fieldset id="AccruedInterestCalculationdateField" style="display: block;">
+                            <li>
+                                <strong>Accrued Interest calculation date: </strong>
+                                <span>$0.00</span>
+                            </li>
+                        </fieldset>
+
+
+                        <br />
+                    </ul>
+                </div>
+            </div><!--col-->
+
+        </div>
+
+        <!--Transaction Title-->
+
+        <div class="row" id="TransactionTitle">
+            <div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div style="margin-left:30px;">
+                            <span style="color: #1c84c6; margin-top: 5px;"><h4><strong>Transaction Data:</strong></h4></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!--Transaction Data-->
+
+        <div class="row" id="TransactionData">
+            <div class="col-sm-12">
+                <hr class="sectionLine">
+            </div>
+            <div>
+                <div class="col-sm-6">
+                    <ul>
+                        <fieldset id="ValueDateField" style="display: block;">
+                            <li class="interLine">
+ <strong>Value Date: </strong>                                <span>5/17/2024</span>
+                            </li>
+                        </fieldset>
+
+                        <fieldset id="LenderPrincipalAmountField" style="display: block;">
+                            <li class="">
+                                <strong>  Principal Amount: </strong>
+                                <span>$645,262.00</span>
+                            </li>
+                        </fieldset>
+
+
+                            <fieldset id="SpecialSetlementInstructionsField" style="display: block;">
+                                <li class="interLine">
+                                    <strong>Special Setlement Instructions: </strong>
+                                    <span>
+                                        <label for="No" style="font-weight:normal;">No</label>
+                                    </span>
+                                </li>
+                            </fieldset>
+
+                        <fieldset id="NonStandardTransactionField" style="display: block;">
+                            <li class="interLine">
+                                <strong>Non Standard Transaction: </strong>
+                                <span><label for="No" style="font-weight:normal;">No</label></span>
+                            </li>
+                        </fieldset>
+
+                        <fieldset id="HasDocumentField" style="display: block;">
+                            <li class="interLine">
+                                <strong>Has Document: </strong>
+                                <span><label for="No" style="font-weight:normal;">No</label></span>
+                            </li>
+                        </fieldset>
+                            <fieldset id="DocumentField" style="display: block;">
+                                <li>
+                                    <strong>Document: </strong>
+
+                                    <a href=""></a>
+                                                <span>
+                                                    <a href="/PMP/File/Download/61569">05 17 2024_Azurite Asset Holding LLC_Coal Asset Holding LLC_Receivable Purchase Agreement - T122629-01.pdf</a>
+
+                                                </span>
+                                                <br />
+
+
+                                </li>
+                            </fieldset>
+
+                        <fieldset id="notesField" style="display: block;">
+                            <li>
+                                <strong>Notes: </strong>
+                                <span id="notes">Receivable purchase agreement</span>
+                            </li>
+                        </fieldset>
+
+
+
+
+
+
+
+                    </ul>
+
+                </div>
+
+
+                <div class="col-sm-6">
+                    <ul>
+
+                            <fieldset id="MaturityDateField" style="display: block;">
+                                <li class="interLine">
+ <strong>Maturity Date: </strong>                                    <span>6/24/2024</span>
+                                </li>
+                            </fieldset>
+
+                        <fieldset id="DocumentDateField" style="display: block;">
+                            <li class="interLine">
+ <strong>Document Date: </strong>                                <span>5/17/2024</span>
+
+                            </li>
+                        </fieldset>
+
+                            <fieldset id="AssetPriceField" style="display: block;">
+                                <li class="interLine">
+                                    <strong>Asset Price: </strong>
+                                    <span>100.00%</span>
+                                </li>
+                            </fieldset>
+
+
+
+
+
+
+
+                            <fieldset id="CouponField" style="display: block;">
+                                <li class="interLine">
+                                    <strong>Coupon: </strong>
+                                    <span>Fixed</span>
+                                </li>
+                            </fieldset>
+
+
+
+
+
+
+
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!--Interest Payments-->
+
+            <div class="row" id="interestPayments">
+
+                <div class="col-sm-12">
+                    <div class="row" style="margin-left: 30px; margin-top: -10px;">
+                        <span style="color: #1c84c6;"><strong>Interest Payments:</strong></span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="col-sm-6">
+                        <ul>
+                                <fieldset id="InterestPeriodField" style="display: block;">
+                                    <li class="interLine">
+                                        <strong>Interest period: </strong>
+                                        <span>Bullet</span>
+                                    </li>
+                                </fieldset>
+                                                            <fieldset id="InterestEffectiveDateField" style="display: block;">
+                                    <li class="">
+                                        <strong>Interest Effective Date: </strong>
+                                        <span><label for="InterestEffectiveDate" style="font-weight:normal;">5/17/2024</label></span>
+
+                                    </li>
+                                </fieldset>
+                                                            <fieldset id="InterestCalcBaseField" style="display: block;">
+                                    <li class="interLine">
+                                        <strong>Interest Calc Base: </strong>
+                                        <span>Actual/360</span>
+                                    </li>
+                                </fieldset>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6">
+                        <ul>
+                                <fieldset id="PikField" style="display: block;">
+                                    <li class="interLine">
+                                        <strong>Pik: </strong>
+                                        <span><label for="No" style="font-weight:normal;">No</label></span>
+                                    </li>
+                                </fieldset>
+                                                        
+
+                            <fieldset id="RateField" style="display: block;">
+                                <li class="interLine">
+ <strong>Rate: </strong>
+                                    <span>6.790079</span>
+
+
+                                </li>
+                            </fieldset>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        <!--Principal Payments-->
+
+            <div class="row" id="PrincipalPayments">
+                <div class="col-sm-6">
+                    <div class="row" style="margin-left: 30px; margin-top: 10px;">
+                        <span style="color: #1c84c6;"><strong>Principal Payments:</strong></span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                </div>
+                <br />
+
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+
+                    <ul>
+                        <fieldset id="PrincipalPeriodField" style="display: block;">
+                            <li class="interLine">
+                                <strong>Principal Period: </strong>
+                                <span>Bullet</span>
+                            </li>
+                        </fieldset>
+                            <fieldset id="PrincipalPrepayableField" style="display: block;">
+                                <li class="interLine">
+                                    <strong>Principal Prepayable: </strong>
+                                    <span><label for="Yes" style="font-weight:normal;">Yes</label></span>
+                                </li>
+                            </fieldset>
+
+
+                            <fieldset id="FeesApplicableField" style="display: block;">
+                                <li class="interLine">
+                                    <strong>Fees Applicable: </strong>
+                                    <span>
+                                        <label for="No" style="font-weight:normal;">No</label>
+                                    </span>
+                                </li>
+                            </fieldset>
+
+
+                        <fieldset id="ReportingCovenantField" style="display: block;">
+                            <li class="interLine">
+                                <strong>Reporting Covenant: </strong>
+                                <span>
+                                    <label for="No" style="font-weight:normal;">No</label>
+                                </span>
+                            </li>
+                        </fieldset>
+
+
+
+
+
+                    </ul>
+
+                </div>
+            </div><!--Principal Payments-->
+    </div>
+</div>
+

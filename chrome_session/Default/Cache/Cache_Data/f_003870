@@ -1,0 +1,679 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link rel="icon" href="/PMP/favicon.ico" />
+
+    <script>
+        processController = '/PMP/Process';
+        securityController = '/PMP/Security';
+        repositoryController = '/PMP/Repository';
+        function refreshAlert() {
+            $("#divAlerts").load(baseUrl + "/Alert/IconAlert");
+        }
+
+
+    </script>
+
+    <link href="/PMP/Content/bcriCss?v=8dtZmDKV-8wL2E0XPMT_xwxQp5sJb6g5eYZPpljDGlU1" rel="stylesheet"/>
+
+<link href="/PMP/Content/Pmp.Web?v=SP6NQ7f6hQDk3XkLMccQvE8SLuiv4mbsXp97IurVNdQ1" rel="stylesheet"/>
+    
+    
+    <title>Home Page</title>
+</head>
+
+<body class="pace-done skin-1">
+    <div class="pace  pace-inactive">
+        <div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
+            <div class="pace-progress-inner"></div>
+        </div>
+        <div class="pace-activity">
+
+        </div>
+    </div>
+
+    <div id="RepositoryJsData"
+         data-saveurl="/PMP/Grid/Edit"
+         data-colModeldataurl="/PMP/Repository/LoadColModelAndData"
+         data-dataurl="/PMP/Grid/GetData">
+    </div>
+
+    <div id="GridCustomViewJsData"
+         data-save="/PMP/GridCustomView/Save"
+         data-index="/PMP/GridCustomView"
+         data-load="/PMP/GridCustomView/Load"
+         data-delete="/PMP/GridCustomView/Delete"
+         data-chooseprofiles="/PMP/GridCustomView/ChooseProfiles"
+         data-setasdefaultme="/PMP/GridCustomView/SetAsDefaultMe"
+         data-share="/PMP/GridCustomView/Share"
+         data-setasdefaultforusers="/PMP/GridCustomView/SetAsDefaultForUsers"
+         data-getowner="/PMP/GridCustomView/GetOwner"
+         data-rename="/PMP/GridCustomView/Rename"></div>
+    <div id="block-wrapper">
+        
+        <div class="sk-spinner sk-spinner-chasing-dots">
+            <div class="sk-dot1"></div>
+            <div class="sk-dot2"></div>
+        </div>
+    </div>
+
+    <div id="wrapper">
+
+        <!-- Lateral Menu -->
+        
+
+<div class="navbar-default sidebar" role="navigation">
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="nav1">
+                <li class="nav-header">
+                    <div class="dropdown profile-element">
+                        <div class="logo-client"></div>
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#" aria-expanded="false">
+                            <span class="block m-t-xs font-bold">Joaquin Garcia Aiello <b class="caret"></b></span>
+                        </a>
+                    <ul class="dropdown-menu animated fadeInRight m-t-xs" x-placement="bottom-start" style="position: absolute; top: 110px; left: 5px; will-change: top, left;">
+                                    
+
+                        <li>
+                            <a class="dropdown-item" href="#"><i class="fa fa-globe fa-fw"></i>Language</a>
+                            <select id="languageSelector" class="form-control placeholder">
+                                        <option selected>English</option>
+                            </select>
+                        </li>
+                        <li class="dropdown-divider"></li>
+						<li>
+							<a href="/PMP/Login/ChangePassword">Change Password</a>
+						</li>
+                    </ul>
+                    </div>
+                    <!--div class="dropdown profile-element">
+
+                    </div-->
+                    <div class="logo-element">
+                        CS
+                    </div>
+                </li>
+            </ul>
+            <div id="nav2">
+                <ul class="nav metismenu" id="side-menu">
+
+    <li>
+        <a href="#"
+           data-navigation="/PMP/Security/Navigation/106" data-accessId="106">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-building-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Entities</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                        <span class="fa arrow"></span>
+                </div>
+            </div>
+        </a>
+
+
+
+            <ul class="nav nav-second-level  collapse">
+                
+    <li>
+        <a href="/PMP/VehicleEntity"
+           data-navigation="/PMP/Security/Navigation/97" data-accessId="97">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-pencil-square-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>ABM Entities</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+
+
+
+            </ul>
+    </li>
+    <li>
+        <a href="#"
+           data-navigation="/PMP/Security/Navigation/27" data-accessId="27">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-sitemap fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Trades</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                        <span class="fa arrow"></span>
+                </div>
+            </div>
+        </a>
+
+
+
+            <ul class="nav nav-second-level  collapse">
+                
+    <li>
+        <a href="/PMP/SearchTradeDetails"
+           data-navigation="/PMP/Security/Navigation/135" data-accessId="135">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-search fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Trade Search</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/CashEvent"
+           data-navigation="/PMP/Security/Navigation/136" data-accessId="136">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-money fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Adjustments</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/TradeTree/Index"
+           data-navigation="/PMP/Security/Navigation/1172" data-accessId="1172">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-tree fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Trade Tree</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+
+
+
+            </ul>
+    </li>
+    <li>
+        <a href="#"
+           data-navigation="/PMP/Security/Navigation/1182" data-accessId="1182">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-area-chart fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Reports</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                        <span class="fa arrow"></span>
+                </div>
+            </div>
+        </a>
+
+
+
+            <ul class="nav nav-second-level  collapse">
+                
+    <li>
+        <a href="/PMP/VheicleEntityPosition"
+           data-navigation="/PMP/Security/Navigation/1142" data-accessId="1142">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-money fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Entity Position</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/CashFlowEntityDashboard"
+           data-navigation="/PMP/Security/Navigation/1151" data-accessId="1151">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Cash Flow</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/PortFolioSummary/Index"
+           data-navigation="/PMP/Security/Navigation/1185" data-accessId="1185">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Portfolio Summary</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/CashReport"
+           data-navigation="/PMP/Security/Navigation/2181" data-accessId="2181">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Cash Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/FailReport"
+           data-navigation="/PMP/Security/Navigation/2183" data-accessId="2183">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Fail Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/MaturityReport"
+           data-navigation="/PMP/Security/Navigation/2184" data-accessId="2184">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Maturity Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/InventoryAL"
+           data-navigation="/PMP/Security/Navigation/94" data-accessId="94">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Active Trades</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/RepeatedPaymentsReport"
+           data-navigation="/PMP/Security/Navigation/2193" data-accessId="2193">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Repeated Payments Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/PaymentProyectionReport"
+           data-navigation="/PMP/Security/Navigation/2192" data-accessId="2192">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Payment Proyection Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/InterestPaymentsGeneratedReport"
+           data-navigation="/PMP/Security/Navigation/2194" data-accessId="2194">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Interest Payments Generated Report</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+
+
+
+            </ul>
+    </li>
+    <li>
+        <a href="#"
+           data-navigation="/PMP/Security/Navigation/1190" data-accessId="1190">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-lock fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>System Administration</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                        <span class="fa arrow"></span>
+                </div>
+            </div>
+        </a>
+
+
+
+            <ul class="nav nav-second-level  collapse">
+                
+    <li>
+        <a href="/PMP/settlements"
+           data-navigation="/PMP/Security/Navigation/2191" data-accessId="2191">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-book fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Settlements</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+    <li>
+        <a href="/PMP/TradeAgreement"
+           data-navigation="/PMP/Security/Navigation/1143" data-accessId="1143">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="fa fa-bar-chart-o fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>Upload Blotter</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+
+
+
+            </ul>
+    </li>
+    <li>
+        <a href="/PMP/WorkFlow"
+           data-navigation="/PMP/Security/Navigation/1171" data-accessId="1171">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+                        <i class="glyphicon glyphicon-transfer fa-fw"></i>                </div>
+                <div class="col-lg-8 col-md-6 col-sm-6">
+                    <span>WorkFlow</span>
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4">
+                </div>
+            </div>
+        </a>
+
+
+
+    </li>
+
+
+                    </ul>
+                </div>
+            </div>
+            <!-- /.sidebar-collapse -->
+        </nav>
+    </div>
+
+
+
+        <!-- Page Content -->
+        <div id="page-wrapper" class="gray-bg">
+
+            <!-- Dropdowns Menu Header -->
+            <div class="row border-bottom">
+                <!-- Navigation -->
+                <nav class="navbar navbar-static-top " role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+                    </div>
+
+                    <ul class="nav navbar-top-links navbar-right">
+
+
+                        
+
+
+
+<li id="workflowAlerts">
+    <ul>
+        <li style="background-color: #1c84c6; margin: 3px; border-radius: 5px;    min-width: 35px;  height: 22px;  text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Review" style="color: white; vertical-align: middle;" id="alertPendingReview" title="Pending Review">
+                10
+            </a>
+        </li>
+
+        <li style="background-color: #23c6c8; margin: 3px; border-radius: 5px;    min-width: 35px; height: 22px;   text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Approval" style="color: white; vertical-align: middle;" id="alertPendingApproval" title="Pending Approval">
+                0
+            </a>
+        </li>
+        <li style="background-color: #9d36d9; margin: 3px; border-radius: 5px;    min-width: 35px; height: 22px;   text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Execution" style="color: white; vertical-align: middle;" id="alertPendingExecution" title="Pending Execution">
+                518
+            </a>
+        </li>
+        <li style="background-color: #206f8a; margin: 3px; border-radius: 5px;    min-width: 35px;  height: 22px;  text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Counterparty%20Execution" style="color: white; vertical-align: middle;" id="alertPendingCounterpartyExecution" title="Pending Counterparty Execution">
+                850
+            </a>
+        </li>
+        <li style="background-color: #55edde; margin: 3px; border-radius: 5px;    min-width: 35px; height: 22px;    text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Wires" style="color: black; vertical-align: middle;" id="alertPendingWires" title="Pending Wires">
+                657
+            </a>
+        </li>
+        <li style="background-color: #f8ac59; margin: 3px; border-radius: 5px;    min-width: 35px; height: 22px;   text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Pending%20Settlement" style="color: black; vertical-align: middle;" id="alertPendingSendingSettlement" title="Pending Settlement">
+                642
+            </a>
+        </li>
+        <li style="background-color: #ed5565; margin: 3px; border-radius: 5px;    min-width: 35px; height: 22px;    text-align: center;">
+            <a href="/PMP/Workflow?statusSelected=Incorrect" style="color: white; vertical-align: middle;" id="alertIncorrect" title="Incorrect">
+                1654
+            </a>
+        </li>
+    </ul>
+</li>
+
+<li>
+</li>
+<li>
+</li>
+
+
+
+
+<script>
+	var updateWorkflowAlerts = function () {
+		$.ajax({
+			url: Bcri.Core.getDomain() + "Alert/getWorkflowAlerts",
+
+		}).done(function (data) {
+			$("#alertPendingReview").text(data.result.pendingReview);
+			$("#alertPendingApproval").text(data.result.pendingApproval);
+			$("#alertIncorrect").text(data.result.pendingIncorrect);
+			$("#alertPendingExecution").text(data.result.pendingExecution);
+			$("#alertPendingCounterpartyExecution").text(data.result.pendingCounterpartyExecution);
+			$("#alertPendingWires").text(data.result.pendingWires);
+			$("#alertPendingSendingSettlement").text(data.result.pendingSettlement);
+			if (data.result.error != undefined) {
+				console.log("Error trying to get workflowAlerts" + data.result.error);
+			}
+		});
+	};
+
+</script>
+
+                        <li>
+                            <a href="/PMP/Login/LogOut"><i class="fa fa-sign-out"></i>Logout</a>
+                        </li>
+                        <!-- /.dropdown -->
+                    </ul>
+                </nav>
+
+            </div>
+
+            <div class="row wrapper wrapper-content border-bottom white-bg dashboard-header page-heading" style="padding-top:15px">
+                
+
+<div class="ibox ">
+    <div class="ibox-title">
+        <h5>Home Page</h5>
+        <div class="ibox-tools">
+            <a class="collapse-link">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+    </div>
+    <div class="ibox-content">
+        <div class="row container-fluid" style="margin-top: 30px; margin-bottom: 15%">
+            <div class="col-lg-8 col-lg-offset-2">
+                <div class="text-center">
+                    <img class="img-fluid" style="max-width: 100%; height: auto;" src="/PMP/Content/images/logo-abs.png" />
+                </div>
+            </div>
+        </div>
+        
+        <div id="AlertJsData"
+             data-GetCountTradesPending="/PMP/Home/GetCountTradesPending">
+        </div>
+    </div>
+</div>
+
+
+            </div>
+
+            <div class="footer">
+                <!-- pie de pagina -->
+
+<div>
+    <b>PMP</b> Portfolio Managment Platform | <small style="color:#999999;">v1.33</small>
+</div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <script src="/PMP/bundles/bcriVendor?v=M7SWun-UQnokViPjxDWIAQaxCO35sbRw0LbYOrvUsHE1"></script>
+
+    <script src="/PMP/bundles/bcriVendorDxEj?v=NZrHLlNRnHe98aSwVlcytv0sD1Pa-bhkm77lx4Myxxs1"></script>
+
+    <script src="/PMP/Scripts/devextreme-localization/dx.messages.en.js"></script>
+
+    
+    
+    <script src="/PMP/Scripts/i18n/grid.locale-en.js"></script>
+
+    
+    
+
+    <script type="text/javascript" src="/PMP/Scripts/bcri.js"></script>
+    <script type="text/javascript" src="/PMP/Scripts/close.js"></script>
+    <script type="text/javascript" src="/PMP/Scripts/dobleTabControl.js"></script>
+
+    <script src="/PMP/bundles/bcri?v=TQFb4OrEtGSXLpWMRV4DofiqjI2e_nt1Vwp26IVJr1g1"></script>
+
+
+<script src="/PMP/bundles/Pmp.Web?v=d9d_5QTvT87cuRUGghVhOXesevXFcetJ5MwD7m9dmxU1"></script>
+
+    
+    <script src="/PMP/Views/Home/Index.js"></script>
+
+
+</body>
+</html>
+
+
+
+

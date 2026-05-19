@@ -1,5 +1,9 @@
 {
-  "excel_path": "C:/Users/JoaquinGarciaAiello/Desktop/Repository/trades.xlsx",
-  "carpeta_dest": "C:/Users/JoaquinGarciaAiello/Desktop/asd",
-  "theme": "verde"
+  "excel_path": "C:/Users/JoaquinGarciaAiello/Desktop/Prueba_Trades.xlsx",
+  "carpeta_dest": "C:/Users/JoaquinGarciaAiello/Desktop/Prueba",
+  "theme": "dark",
+  "file_type": "pdf",
+  "filter_mode": "id",
+  "keyword": "Agreement",
+  "turbo_workers": 3
 }

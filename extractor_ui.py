@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Extractor de Trades - PMP Platform v1.3.0
 """
@@ -22,7 +23,7 @@ except ImportError:
 #  CONFIGURACIÓN
 # ============================================================
 
-VERSION       = "1.7.2"
+VERSION       = "2.2.0"
 AUTHOR        = "Joaquín García²"
 URL_LOGIN     = "https://pmp.abscapco.com/PMP/Login/Login/0"
 URL_TRADES    = "https://pmp.abscapco.com/PMP/SearchTradeDetails"
@@ -34,6 +35,7 @@ APP_DIR       = Path(os.path.dirname(os.path.abspath(__file__)))
 SESION_DIR    = str(APP_DIR / "chrome_session")
 PROGRESO_PATH = str(APP_DIR / "progreso.txt")
 CONFIG_PATH   = str(APP_DIR / "config.json")
+LOGS_DIR      = APP_DIR / "Logs"
 DEFAULT_DEST  = str(Path.home() / "Desktop" / "PDF_Trades")
 
 MAX_REINTENTOS = 3
@@ -231,6 +233,111 @@ THEME_LABELS = {
     "verde":  "🌿 Verde",
     "marron": "🪵 Marrón",
 }
+THEME_COLORS = {
+    "dark":   "#7aa2f7",
+    "light":  "#3b6fd4",
+    "bordo":  "#e05070",
+    "verde":  "#40b060",
+    "marron": "#c88040",
+}
+
+# Manual sections
+MANUAL_SECTIONS = [
+    {
+        "title": "📋  Formato del Excel",
+        "img":   "01_pantalla_principal.png",
+        "text":  (
+            "El archivo Excel debe tener una columna llamada exactamente TradeId "
+            "(respetando mayúsculas). Cada fila debe contener un ID en el formato "
+            "T123456-01 (letra T, 6 dígitos, guión, 2 dígitos).\n\n"
+            "Ejemplo válido:\n"
+            "  T004521-01\n"
+            "  T106729-01\n"
+            "  T003513-01\n\n"
+            "Podés tener otras columnas en el Excel — el extractor solo lee TradeId."
+        ),
+    },
+    {
+        "title": "📂  Cargar Excel y carpeta",
+        "img":   "03_cargar_excel.png",
+        "text":  (
+            "1. Click en Buscar... para seleccionar tu archivo Excel con los IDs.\n"
+            "2. Click en Cambiar... para elegir la carpeta donde se guardarán los archivos descargados.\n\n"
+            "La app recuerda ambas rutas entre sesiones — no necesitás configurarlas cada vez."
+        ),
+    },
+    {
+        "title": "⚙️  Tipo de archivo y filtro",
+        "img":   "05_tipo_y_filtro.png",
+        "text":  (
+            "Descargar:\n"
+            "  • Solo PDF — descarga únicamente archivos .pdf\n"
+            "  • Solo XLSX — descarga únicamente archivos .xlsx / .xls\n"
+            "  • Todos — descarga cualquier tipo de archivo\n\n"
+            "Filtro:\n"
+            "  • Match ID — solo archivos cuyo nombre contiene el ID del trade (default)\n"
+            "  • Todos — descarga todos los archivos del trade sin filtrar\n"
+            "  • Palabra clave — solo archivos que contengan la palabra escrita en el campo\n\n"
+            "Ambos filtros se aplican en simultáneo."
+        ),
+    },
+    {
+        "title": "▶️  Iniciar, Pausar y Detener",
+        "img":   "07_pausar_reanudar.png",
+        "text":  (
+            "Iniciar — comienza el proceso de descarga con los IDs del Excel.\n\n"
+            "Pausar — pausa el proceso después de terminar el trade actual. "
+            "El botón cambia a Reanudar. Click de nuevo para continuar.\n\n"
+            "Detener — detiene el proceso completamente después del trade actual. "
+            "Al volver a Iniciar, retoma desde donde quedó (los ya descargados se saltean).\n\n"
+            "La sesión de Chrome se abre automáticamente. Si pide login, "
+            "ingresá tus credenciales manualmente — el script espera hasta que estés dentro."
+        ),
+    },
+    {
+        "title": "✏️  Editor de IDs",
+        "img":   "08_editor_ids.png",
+        "text":  (
+            "Click en Editar IDs para abrir el panel de edición.\n\n"
+            "  • Agregar — escribí un ID en el campo y presioná Enter o click en + Agregar. "
+            "El sistema detecta duplicados automáticamente.\n"
+            "  • Eliminar — seleccioná un ID de la lista y click en Eliminar seleccionado.\n"
+            "  • Guardar en Excel — guarda los cambios en el archivo Excel. "
+            "Los cambios se reflejan en la próxima ejecución, no en la corrida actual.\n\n"
+            "El panel se puede abrir y cerrar sin interrumpir el proceso."
+        ),
+    },
+    {
+        "title": "❌  Errores comunes",
+        "img":   "09_errores_comunes.png",
+        "text":  (
+            "Timeout / Trade no encontrado\n"
+            "  El ID no existe en PMP o la página tardó demasiado. "
+            "El script reintenta 3 veces automáticamente.\n\n"
+            "ERR_NETWORK_CHANGED\n"
+            "  Se cortó la conexión a internet. El script reintenta en 5 segundos. "
+            "Si falla 3 veces, marca el trade como Error y continúa con el siguiente.\n\n"
+            "Sin archivos / Sin PDFs\n"
+            "  El trade existe pero no tiene archivos del tipo solicitado. "
+            "Cambiá el filtro de tipo o verificá manualmente en PMP.\n\n"
+            "Chrome no abre\n"
+            "  Cerrá Chrome completamente (incluso desde el administrador de tareas) y volvé a intentar."
+        ),
+    },
+    {
+        "title": "📊  Resumen y Logs",
+        "img":   "10_resumen_final.png",
+        "text":  (
+            "Al finalizar cada corrida, el log muestra un resumen con:\n"
+            "  • Exitosos — trades descargados correctamente\n"
+            "  • Con error — trades que fallaron después de 3 intentos\n"
+            "  • PDFs descargados — total de archivos guardados\n\n"
+            "Un archivo Excel con el detalle se guarda automáticamente en:\n"
+            "  Extractor/Logs/log_descargas_YYYYMMDD_HHMMSS.xlsx\n\n"
+            "Podés revisar los logs anteriores en esa carpeta para ver el historial de descargas."
+        ),
+    },
+]
 
 STATUS_ICONS = {
     ESTADO_PENDIENTE: "⏳",
@@ -246,7 +353,7 @@ class App:
         self.root = root
         self.root.title(f"Extractor {VERSION} - {AUTHOR}")
         self.root.geometry("1100x660")
-        self.root.minsize(800, 500)
+        self.root.minsize(900, 580)
         self.root.resizable(True, True)
 
         # Cargar config guardada
@@ -265,6 +372,10 @@ class App:
         self.all_ids       = []
 
         self._editor_labels = []
+        self.file_type   = tk.StringVar(value=cfg.get("file_type", "pdf"))
+        self.filter_mode   = tk.StringVar(value=cfg.get("filter_mode", "id"))
+        self.keyword       = tk.StringVar(value=cfg.get("keyword", ""))
+        self.turbo_workers = tk.IntVar(value=cfg.get("turbo_workers", 1))
         self._build_ui()
         self._apply_theme()
 
@@ -299,19 +410,17 @@ class App:
         self.lbl_sub.pack(anchor="w")
 
         # Botón tema derecha
-        theme_frame = tk.Frame(self.header)
-        theme_frame.grid(row=0, column=2, sticky="e", padx=16)
-        self.theme_frame = theme_frame
+        # Manual button top-right
+        self.btn_manual = tk.Button(self.header, text="❓  Manual",
+                                    font=("Segoe UI", 9), relief="flat",
+                                    cursor="hand2", bd=0, padx=12, pady=6,
+                                    command=self._toggle_manual)
+        self.btn_manual.grid(row=0, column=2, sticky="e", padx=16)
+        self.manual_visible = False
 
+        # Theme frame (placeholder, circles added in _build_theme_circles)
+        self.theme_frame = tk.Frame(self.header)
         self.theme_buttons = {}
-        for t_name in ["dark", "light", "bordo", "verde", "marron"]:
-            btn = tk.Button(theme_frame,
-                            text=THEME_LABELS[t_name],
-                            font=("Segoe UI", 8), relief="flat",
-                            cursor="hand2", bd=0, padx=8, pady=4,
-                            command=lambda n=t_name: self._set_theme(n))
-            btn.pack(side="left", padx=2)
-            self.theme_buttons[t_name] = btn
 
         # Título centro (invisible, solo para balance)
         self.lbl_title = tk.Label(self.header, text="",
@@ -329,7 +438,16 @@ class App:
         self.left = tk.Frame(self.body)
         self.left.grid(row=0, column=0, sticky="nsew", padx=(14, 6), pady=6)
         self.left.columnconfigure(0, weight=1)
-        self.left.rowconfigure(4, weight=1)
+        # Only log row expands, everything else is fixed height
+        self.left.rowconfigure(0, weight=0)  # excel label
+        self.left.rowconfigure(1, weight=0)  # excel input
+        self.left.rowconfigure(2, weight=0)  # dest label
+        self.left.rowconfigure(3, weight=0)  # dest input
+        self.left.rowconfigure(4, weight=0)  # file type
+        self.left.rowconfigure(5, weight=0)  # filter
+        self.left.rowconfigure(6, weight=0)  # turbo
+        self.left.rowconfigure(7, weight=0)  # log label
+        self.left.rowconfigure(8, weight=1)  # log (expands)
 
         # Excel
         self.lbl_excel = tk.Label(self.left, text="Archivo Excel:",
@@ -341,7 +459,7 @@ class App:
         self.entry_excel = tk.Entry(row_excel, textvariable=self.excel_path,
                                     font=("Segoe UI", 10), relief="flat",
                                     bd=0, highlightthickness=1)
-        self.entry_excel.grid(row=0, column=0, sticky="ew", ipady=7, padx=(0, 8))
+        self.entry_excel.grid(row=0, column=0, sticky="ew", ipady=5, padx=(0, 8))
         self.btn_excel = tk.Button(row_excel, text="Buscar...",
                                    font=("Segoe UI", 10), relief="flat",
                                    cursor="hand2", command=self._seleccionar_excel,
@@ -358,22 +476,119 @@ class App:
         self.entry_dest = tk.Entry(row_dest, textvariable=self.carpeta_dest,
                                    font=("Segoe UI", 10), relief="flat",
                                    bd=0, highlightthickness=1)
-        self.entry_dest.grid(row=0, column=0, sticky="ew", ipady=7, padx=(0, 8))
+        self.entry_dest.grid(row=0, column=0, sticky="ew", ipady=5, padx=(0, 8))
         self.btn_dest = tk.Button(row_dest, text="Cambiar...",
                                   font=("Segoe UI", 10), relief="flat",
                                   cursor="hand2", command=self._seleccionar_carpeta,
                                   padx=14, pady=5)
         self.btn_dest.grid(row=0, column=1)
 
+        # Tipo de archivo
+        frame_tipo = tk.Frame(self.left)
+        frame_tipo.grid(row=4, column=0, sticky="ew", pady=(4, 2))
+        self.frame_tipo = frame_tipo
+
+        # Compact single row: label + radios inline
+        self.lbl_tipo = tk.Label(frame_tipo, text="Descargar:",
+                                 font=("Segoe UI", 10, "bold"), anchor="w")
+        self.lbl_tipo.pack(side="left", padx=(0, 10))
+
+        radio_row = tk.Frame(frame_tipo)
+        radio_row.pack(side="left", anchor="w")
+        self.radio_row = radio_row
+
+        self.rb_pdf = tk.Radiobutton(radio_row, text="Solo PDF",
+                                     variable=self.file_type, value="pdf",
+                                     font=("Segoe UI", 10),
+                                     command=self._save_config)
+        self.rb_pdf.pack(side="left", padx=(0, 12))
+
+        self.rb_xlsx = tk.Radiobutton(radio_row, text="Solo XLSX",
+                                      variable=self.file_type, value="xlsx",
+                                      font=("Segoe UI", 10),
+                                      command=self._save_config)
+        self.rb_xlsx.pack(side="left", padx=(0, 12))
+
+        self.rb_all = tk.Radiobutton(radio_row, text="Todos",
+                                     variable=self.file_type, value="all",
+                                     font=("Segoe UI", 10),
+                                     command=self._save_config)
+        self.rb_all.pack(side="left")
+
+        # Filtro de archivos
+        frame_filtro = tk.Frame(self.left)
+        frame_filtro.grid(row=5, column=0, sticky="ew", pady=(4, 2))
+        self.frame_filtro = frame_filtro
+
+        self.lbl_filtro = tk.Label(frame_filtro, text="Filtro:",
+                                   font=("Segoe UI", 10, "bold"), anchor="w")
+        self.lbl_filtro.pack(side="left", padx=(0, 10))
+
+        filtro_row = tk.Frame(frame_filtro)
+        filtro_row.pack(side="left", anchor="w", fill="x", expand=True)
+        self.filtro_row = filtro_row
+
+        self.rb_id = tk.Radiobutton(filtro_row, text="Match ID",
+                                    variable=self.filter_mode, value="id",
+                                    font=("Segoe UI", 10),
+                                    command=self._on_filter_change)
+        self.rb_id.pack(side="left", padx=(0, 12))
+
+        self.rb_all_files = tk.Radiobutton(filtro_row, text="Todos",
+                                           variable=self.filter_mode, value="all",
+                                           font=("Segoe UI", 10),
+                                           command=self._on_filter_change)
+        self.rb_all_files.pack(side="left", padx=(0, 12))
+
+        self.rb_keyword = tk.Radiobutton(filtro_row, text="Palabra clave:",
+                                         variable=self.filter_mode, value="keyword",
+                                         font=("Segoe UI", 10),
+                                         command=self._on_filter_change)
+        self.rb_keyword.pack(side="left", padx=(0, 6))
+
+        self.entry_keyword = tk.Entry(filtro_row, textvariable=self.keyword,
+                                      font=("Segoe UI", 10), relief="flat",
+                                      bd=0, highlightthickness=1, width=14)
+        self.entry_keyword.pack(side="left", ipady=4)
+        self.entry_keyword.bind("<KeyRelease>", lambda e: self._save_config())
+
+        # Modo turbo
+        frame_turbo = tk.Frame(self.left)
+        frame_turbo.grid(row=6, column=0, sticky="ew", pady=(4, 2))
+        self.frame_turbo = frame_turbo
+
+        self.lbl_turbo = tk.Label(frame_turbo, text="Modo turbo:",
+                                  font=("Segoe UI", 10, "bold"), anchor="w")
+        self.lbl_turbo.pack(side="left", padx=(0, 10))
+
+        turbo_row = tk.Frame(frame_turbo)
+        turbo_row.pack(side="left", anchor="w")
+        self.turbo_row = turbo_row
+
+        for val, label in [(1, "1x  (normal)"), (2, "2x"), (3, "3x")]:
+            rb = tk.Radiobutton(turbo_row, text=label,
+                                variable=self.turbo_workers, value=val,
+                                font=("Segoe UI", 10),
+                                command=self._save_config)
+            rb.pack(side="left", padx=(0, 12))
+            if not hasattr(self, '_turbo_rbs'):
+                self._turbo_rbs = []
+            self._turbo_rbs.append(rb)
+
+        self.lbl_turbo_warn = tk.Label(frame_turbo,
+                                       text="⚠️ experimental",
+                                       font=("Segoe UI", 8))
+        self.lbl_turbo_warn.pack(side="left", padx=(4, 0))
+
         # Log
         self.lbl_log = tk.Label(self.left, text="Log de actividad:",
                                 font=("Segoe UI", 9), anchor="w")
-        self.lbl_log.grid(row=4, column=0, sticky="w")
+        self.lbl_log.grid(row=7, column=0, sticky="w")
         self.log = scrolledtext.ScrolledText(self.left, font=("Consolas", 9),
                                              relief="flat", bd=0,
                                              state="disabled", wrap="word")
-        self.log.grid(row=5, column=0, sticky="nsew", pady=(4, 0))
-        self.left.rowconfigure(5, weight=1)
+        self.log.grid(row=8, column=0, sticky="nsew", pady=(4, 0))
+        self.left.rowconfigure(8, weight=1)
 
         # ── Panel derecho — Lista de trades ──────────────────
         self.right = tk.Frame(self.body)
@@ -425,6 +640,94 @@ class App:
         self.lbl_counter = tk.Label(self.right, text="",
                                     font=("Segoe UI", 8), anchor="e")
         self.lbl_counter.grid(row=4, column=0, sticky="e")
+
+        # Theme circles
+        self.circles_frame = tk.Frame(self.right)
+        self.circles_frame.grid(row=5, column=0, sticky="e", pady=(8, 2))
+        self._build_theme_circles()
+
+        # Manual panel
+        self.frame_manual = tk.Frame(self.body)
+        self.frame_manual.columnconfigure(0, weight=1)
+        self.frame_manual.rowconfigure(1, weight=1)
+
+        lbl_manual_title = tk.Label(self.frame_manual,
+                                    text="📖  Manual de uso",
+                                    font=("Segoe UI", 11, "bold"), anchor="w")
+        lbl_manual_title.grid(row=0, column=0, sticky="w", pady=(4, 6))
+        self._manual_header_labels = [lbl_manual_title]
+
+        # Scrollable content
+        manual_canvas = tk.Canvas(self.frame_manual, highlightthickness=0)
+        manual_canvas.grid(row=1, column=0, sticky="nsew")
+        manual_sb = ttk.Scrollbar(self.frame_manual, orient="vertical",
+                                   command=manual_canvas.yview)
+        manual_sb.grid(row=1, column=1, sticky="ns")
+        manual_canvas.configure(yscrollcommand=manual_sb.set)
+
+        self.manual_inner = tk.Frame(manual_canvas)
+        self.manual_window = manual_canvas.create_window((0, 0), window=self.manual_inner,
+                                                          anchor="nw")
+        self.manual_canvas = manual_canvas
+        self.manual_inner.bind("<Configure>",
+                               lambda e: manual_canvas.configure(
+                                   scrollregion=manual_canvas.bbox("all")))
+        manual_canvas.bind("<Configure>",
+                           lambda e: manual_canvas.itemconfig(
+                               self.manual_window, width=e.width))
+
+        # Bind mousewheel
+        def _on_mousewheel(e):
+            manual_canvas.yview_scroll(int(-1*(e.delta/120)), "units")
+        manual_canvas.bind("<MouseWheel>", _on_mousewheel)
+        self.manual_inner.bind("<MouseWheel>", _on_mousewheel)
+
+        # Build sections
+        self._manual_section_frames = []
+        self._manual_section_title_labels = []
+        self._manual_section_text_labels = []
+        self._manual_img_labels = []
+        self._manual_img_refs = []
+
+        for sec in MANUAL_SECTIONS:
+            sec_frame = tk.Frame(self.manual_inner, pady=8)
+            sec_frame.pack(fill="x", padx=8)
+            self._manual_section_frames.append(sec_frame)
+
+            # Separator line
+            sep = tk.Frame(sec_frame, height=1)
+            sep.pack(fill="x", pady=(0, 6))
+            self._manual_section_frames.append(sep)
+
+            # Title
+            t_lbl = tk.Label(sec_frame, text=sec["title"],
+                             font=("Segoe UI", 10, "bold"), anchor="w",
+                             wraplength=320, justify="left")
+            t_lbl.pack(anchor="w")
+            self._manual_section_title_labels.append(t_lbl)
+
+            # Image placeholder
+            img_path = APP_DIR / "Capturas_manual" / sec["img"]
+            img_lbl = tk.Label(sec_frame, anchor="w")
+            img_lbl.pack(anchor="w", pady=(4, 4))
+            self._manual_img_labels.append(img_lbl)
+            self._manual_img_refs.append(None)
+            if img_path.exists() and PIL_AVAILABLE:
+                try:
+                    img = Image.open(img_path)
+                    img.thumbnail((320, 200), Image.LANCZOS)
+                    photo = ImageTk.PhotoImage(img)
+                    img_lbl.config(image=photo)
+                    self._manual_img_refs[-1] = photo
+                except Exception:
+                    pass
+
+            # Text
+            txt_lbl = tk.Label(sec_frame, text=sec["text"],
+                               font=("Segoe UI", 9), anchor="w",
+                               wraplength=320, justify="left")
+            txt_lbl.pack(anchor="w", pady=(2, 0))
+            self._manual_section_text_labels.append(txt_lbl)
 
         # Editor panel
         self.editor_visible = False
@@ -544,6 +847,9 @@ class App:
 
     def _toggle_editor(self):
         if not self.editor_visible:
+            # Close manual if open
+            if self.manual_visible:
+                self._toggle_manual()
             self.body.columnconfigure(2, weight=2)
             self.frame_editor.grid(row=0, column=2, sticky="nsew", padx=(6, 14), pady=6)
             self.frame_editor.rowconfigure(1, weight=1)
@@ -640,6 +946,45 @@ class App:
         self._apply_theme()
         self._save_config()
 
+    def _build_theme_circles(self):
+        for w in self.circles_frame.winfo_children():
+            w.destroy()
+        self.theme_buttons = {}
+        for t_name in ["dark", "light", "bordo", "verde", "marron"]:
+            color = THEME_COLORS[t_name]
+            is_active = t_name == self.theme_name
+            size = 22 if is_active else 18
+            canvas = tk.Canvas(self.circles_frame, width=size, height=size,
+                               highlightthickness=0, cursor="hand2")
+            canvas.pack(side="left", padx=3)
+            # Outer ring if active
+            if is_active:
+                canvas.create_oval(1, 1, size-1, size-1,
+                                   fill=color, outline="white", width=2)
+            else:
+                canvas.create_oval(2, 2, size-2, size-2,
+                                   fill=color, outline="")
+            canvas.bind("<Button-1>", lambda e, n=t_name: self._set_theme(n))
+            canvas.bind("<Enter>", lambda e, c=canvas, col=color:
+                        c.config(cursor="hand2"))
+            self.theme_buttons[t_name] = canvas
+
+    def _toggle_manual(self):
+        if not self.manual_visible:
+            # Close editor if open
+            if self.editor_visible:
+                self._toggle_editor()
+            self.body.columnconfigure(2, weight=2)
+            self.frame_manual.grid(row=0, column=2, sticky="nsew",
+                                   padx=(6, 14), pady=6)
+            self.frame_manual.rowconfigure(1, weight=1)
+            self.btn_manual.config(text="✕  Cerrar manual")
+            self.manual_visible = True
+        else:
+            self.frame_manual.grid_remove()
+            self.btn_manual.config(text="❓  Manual")
+            self.manual_visible = False
+
     def _apply_theme(self):
         t = THEMES[self.theme_name]
         icon = "🌙  Modo oscuro" if self.theme_name == "light" else "☀️  Modo claro"
@@ -661,15 +1006,11 @@ class App:
         self.lbl_brand.configure(bg=t["bg2"], fg=t["fg"])
         self.lbl_sub.configure(bg=t["bg2"], fg=t["fg2"])
         self.lbl_title.configure(bg=t["bg2"], fg=t["fg"])
-        self.theme_frame.configure(bg=t["bg2"])
-        for name, btn in self.theme_buttons.items():
-            is_active = name == self.theme_name
-            btn.configure(
-                bg=t["accent"] if is_active else t["bg2"],
-                fg=t["bg"] if is_active else t["theme_btn_fg"],
-                activebackground=t["accent"] if is_active else t["bg2"],
-                activeforeground=t["bg"],
-            )
+        self._build_theme_circles()
+        # Update circles background
+        for canvas in self.circles_frame.winfo_children():
+            canvas.configure(bg=t["bg2"])
+        self.circles_frame.configure(bg=t["bg"])
 
         # Left panel
         self.left.configure(bg=t["bg"])
@@ -742,6 +1083,45 @@ class App:
                              thickness=8)
 
         self.status.configure(bg=t["bg2"], fg=t["fg2"])
+
+        # Radio buttons - tipo archivo
+        if hasattr(self, "frame_tipo"):
+            self.frame_tipo.configure(bg=t["bg"])
+            self.lbl_tipo.configure(bg=t["bg"], fg=t["fg_label"])
+            self.radio_row.configure(bg=t["bg"])
+            for rb in [self.rb_pdf, self.rb_xlsx, self.rb_all]:
+                rb.configure(bg=t["bg"], fg=t["fg"],
+                             selectcolor=t["bg2"],
+                             activebackground=t["bg"],
+                             activeforeground=t["fg"])
+
+        # Turbo
+        if hasattr(self, "frame_turbo"):
+            self.frame_turbo.configure(bg=t["bg"])
+            self.lbl_turbo.configure(bg=t["bg"], fg=t["fg_label"])
+            self.turbo_row.configure(bg=t["bg"])
+            self.lbl_turbo_warn.configure(bg=t["bg"], fg=t["warning"])
+            if hasattr(self, "_turbo_rbs"):
+                for rb in self._turbo_rbs:
+                    rb.configure(bg=t["bg"], fg=t["fg"],
+                                 selectcolor=t["bg2"],
+                                 activebackground=t["bg"],
+                                 activeforeground=t["fg"])
+
+        # Radio buttons - filtro
+        if hasattr(self, "frame_filtro"):
+            self.frame_filtro.configure(bg=t["bg"])
+            self.lbl_filtro.configure(bg=t["bg"], fg=t["fg_label"])
+            self.filtro_row.configure(bg=t["bg"])
+            for rb in [self.rb_id, self.rb_all_files, self.rb_keyword]:
+                rb.configure(bg=t["bg"], fg=t["fg"],
+                             selectcolor=t["bg2"],
+                             activebackground=t["bg"],
+                             activeforeground=t["fg"])
+            self.entry_keyword.configure(bg=t["bg3"], fg=t["fg"],
+                                         insertbackground=t["fg"],
+                                         highlightbackground=t["border"],
+                                         highlightcolor=t["accent"])
         if hasattr(self, "frame_editor"):
             self.frame_editor.configure(bg=t["bg"])
             for lbl in self._editor_labels:
@@ -775,10 +1155,24 @@ class App:
         self.trades_estado = {id_: ESTADO_PENDIENTE for id_ in ids}
         # Verificar qué IDs ya tienen archivo en la carpeta de destino
         carpeta = Path(self.carpeta_dest.get())
+        file_type_c = self.file_type.get()
+        keyword_c   = self.keyword.get().strip().lower()
+        filter_c    = self.filter_mode.get()
         if carpeta.exists():
             archivos = [f.name for f in carpeta.iterdir() if f.is_file()]
             for id_ in ids:
-                if any(id_ in nombre for nombre in archivos):
+                archivos_id = [n for n in archivos if id_ in n]
+                if not archivos_id:
+                    continue
+                if file_type_c == "pdf":
+                    match = any(n.lower().endswith(".pdf") for n in archivos_id)
+                elif file_type_c == "xlsx":
+                    match = any(n.lower().endswith((".xlsx", ".xls")) for n in archivos_id)
+                else:
+                    match = False  # "all" mode: check file by file
+                if match and filter_c == "keyword" and keyword_c:
+                    match = any(keyword_c in n.lower() for n in archivos_id)
+                if match:
                     self.trades_estado[id_] = ESTADO_OK
         self._refresh_list()
 
@@ -820,6 +1214,15 @@ class App:
 
     # ── HELPERS ──────────────────────────────────────────────
 
+    def _on_filter_change(self):
+        # Enable/disable keyword entry based on mode
+        if self.filter_mode.get() == "keyword":
+            self.entry_keyword.config(state="normal")
+            self.entry_keyword.focus()
+        else:
+            self.entry_keyword.config(state="disabled")
+        self._save_config()
+
     def _load_config(self):
         try:
             if Path(CONFIG_PATH).exists():
@@ -834,6 +1237,10 @@ class App:
                 "excel_path":   self.excel_path.get(),
                 "carpeta_dest": self.carpeta_dest.get(),
                 "theme":        self.theme_name,
+                "file_type":    self.file_type.get(),
+                "filter_mode":   self.filter_mode.get(),
+                "keyword":       self.keyword.get(),
+                "turbo_workers": self.turbo_workers.get(),
             }
             Path(CONFIG_PATH).write_text(json.dumps(cfg, indent=2))
         except Exception:
@@ -959,13 +1366,31 @@ class App:
         # Verificar qué IDs ya tienen archivo descargado en la carpeta destino
         carpeta_check = Path(self.carpeta_dest.get())
         ya_descargados = set()
+        file_type_check = self.file_type.get()
+        filter_mode_check = self.filter_mode.get()
+        keyword_check = self.keyword.get().strip().lower()
+
         if carpeta_check.exists():
             archivos_existentes = [f.name for f in carpeta_check.iterdir() if f.is_file()]
             for id_ in ids:
-                if any(id_ in nombre for nombre in archivos_existentes):
+                archivos_id = [n for n in archivos_existentes if id_ in n]
+                if not archivos_id:
+                    continue
+                # Filter by type to check if the right type already exists
+                if file_type_check == "pdf":
+                    match = any(n.lower().endswith(".pdf") for n in archivos_id)
+                elif file_type_check == "xlsx":
+                    match = any(n.lower().endswith((".xlsx", ".xls")) for n in archivos_id)
+                else:
+                    # "all" mode: never skip the trade, check file by file during download
+                    match = False
+                # Also consider keyword filter
+                if match and filter_mode_check == "keyword" and keyword_check:
+                    match = any(keyword_check in n.lower() for n in archivos_id)
+                if match:
                     ya_descargados.add(id_)
         if ya_descargados:
-            self._log(f"   → {len(ya_descargados)} ya tienen archivo en la carpeta, se saltean...", "info")
+            self._log(f"   → {len(ya_descargados)} ya tienen archivo del tipo requerido, se saltean...", "info")
 
         ids_pendientes = [id_ for id_ in ids if id_ not in ya_descargados]
         total = len(ids_pendientes)
@@ -995,43 +1420,82 @@ class App:
             else:
                 self._log("✅ Sesión activa.\n", "ok")
 
-            for i, trade_id in enumerate(ids_pendientes, 1):
-                if not self.running:
-                    break
+            workers = self.turbo_workers.get()
+            processed = 0
+            results_lock = asyncio.Lock()
 
-                self._pause_event.wait()
-                if not self.running:
-                    break
-
-                self._log(f"[{i}/{total}] Procesando: {trade_id}", "info")
+            async def _worker(worker_id, trade_id, page_w, trade_idx):
+                nonlocal processed
+                self._log(f"[{trade_idx}/{total}] [{worker_id}x] Procesando: {trade_id}", "info")
                 self._set_estado(trade_id, "Procesando")
-                self.root.after(0, lambda v=i, m=total, t=trade_id:
-                                self._set_progress(v, m, f"Procesando {t}  ({v}/{m})"))
                 exito = False
-
                 for intento in range(1, MAX_REINTENTOS + 1):
                     try:
-                        archivos, estado = await self._procesar_trade(page, trade_id, carpeta)
-                        resultados.append({"ID": trade_id, "Estado": estado, "Archivos": archivos})
+                        archivos, estado = await self._procesar_trade(page_w, trade_id, carpeta)
+                        async with results_lock:
+                            resultados.append({"ID": trade_id, "Estado": estado, "Archivos": archivos})
+                            processed += 1
                         self._set_estado(trade_id, estado)
-                        # Progreso basado en archivos reales, no txt
+                        self.root.after(0, lambda v=trade_idx, m=total, t=trade_id:
+                                        self._set_progress(v, m, f"Procesando {t}  ({v}/{m})"))
                         exito = True
                         break
                     except Exception as e:
-                        self._log(f"   ⚠️  Intento {intento}/{MAX_REINTENTOS}: {e}", "warning")
+                        self._log(f"   ⚠️  [{worker_id}x] Intento {intento}/{MAX_REINTENTOS}: {e}", "warning")
                         if intento < MAX_REINTENTOS:
                             self._log("   🔄 Reintentando en 5s...", "warning")
                             await asyncio.sleep(5)
                             try:
-                                await page.goto(URL_TRADES)
-                                await page.wait_for_load_state("networkidle")
+                                await page_w.goto(URL_TRADES)
+                                await page_w.wait_for_load_state("networkidle")
                             except Exception:
                                 pass
-
                 if not exito:
-                    self._log(f"   ❌ Falló después de {MAX_REINTENTOS} intentos", "error")
+                    self._log(f"   ❌ [{worker_id}x] Falló: {trade_id}", "error")
                     self._set_estado(trade_id, ESTADO_ERROR)
-                    resultados.append({"ID": trade_id, "Estado": ESTADO_ERROR, "Archivos": 0})
+                    async with results_lock:
+                        resultados.append({"ID": trade_id, "Estado": ESTADO_ERROR, "Archivos": 0})
+                        processed += 1
+
+            if workers == 1:
+                # Modo normal — una sola página
+                for i, trade_id in enumerate(ids_pendientes, 1):
+                    if not self.running:
+                        break
+                    self._pause_event.wait()
+                    if not self.running:
+                        break
+                    await _worker(1, trade_id, page, i)
+            else:
+                # Modo turbo — múltiples páginas en paralelo
+                self._log(f"⚡ Modo turbo {workers}x activado", "info")
+                extra_pages = []
+                for _ in range(workers - 1):
+                    p = await context.new_page()
+                    await p.goto(URL_TRADES)
+                    await p.wait_for_load_state("networkidle")
+                    extra_pages.append(p)
+                all_pages = [page] + extra_pages
+
+                # Procesar en tandas de N
+                for batch_start in range(0, len(ids_pendientes), workers):
+                    if not self.running:
+                        break
+                    self._pause_event.wait()
+                    if not self.running:
+                        break
+                    batch = ids_pendientes[batch_start:batch_start + workers]
+                    tasks = [
+                        _worker(idx + 1, tid, all_pages[idx], batch_start + idx + 1)
+                        for idx, tid in enumerate(batch)
+                    ]
+                    await asyncio.gather(*tasks)
+
+                for p in extra_pages:
+                    try:
+                        await p.close()
+                    except Exception:
+                        pass
 
             await context.close()
 
@@ -1048,8 +1512,9 @@ class App:
         self._log(f"📁  PDFs descargados: {pdfs}", "info")
 
         if not df_log.empty:
-            log_path = f"log_descargas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-            df_log.to_excel(log_path, index=False)
+            LOGS_DIR.mkdir(exist_ok=True)
+            log_path = LOGS_DIR / f"log_descargas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            df_log.to_excel(str(log_path), index=False)
             self._log(f"📋  Log guardado en : {log_path}", "info")
 
         self._log("\n✔️  Proceso finalizado.", "ok")
@@ -1105,28 +1570,62 @@ class App:
         await page.wait_for_selector("#myModal.in", timeout=10_000)
         await page.wait_for_timeout(1000)
 
-        links = page.locator(f"#myModal a[href*='/PMP/File/Download/']:has-text('{trade_id}')")
+        # Select links based on filter mode
+        filter_mode = self.filter_mode.get()
+        keyword     = self.keyword.get().strip().lower()
+        file_type   = self.file_type.get()
+
+        if filter_mode == "id":
+            links = page.locator(f"#myModal a[href*='/PMP/File/Download/']:has-text('{trade_id}')")
+        else:
+            links = page.locator("#myModal a[href*='/PMP/File/Download/']")
+
         count = await links.count()
 
         hrefs, nombres = [], []
         for j in range(count):
             link = links.nth(j)
-            nombre_raw = (await link.inner_text()).strip()
-            if not nombre_raw.lower().endswith('.pdf'):
+            nombre_raw   = (await link.inner_text()).strip()
+            nombre_lower = nombre_raw.lower()
+
+            # Apply keyword filter
+            if filter_mode == "keyword" and keyword and keyword not in nombre_lower:
+                self._log(f"   Ignorando (no contiene '{keyword}'): {nombre_raw}", "normal")
                 continue
+
+            # Apply file type filter
+            ext = nombre_lower.rsplit(".", 1)[-1] if "." in nombre_lower else ""
+            if file_type == "pdf" and ext != "pdf":
+                self._log(f"   Ignorando (no es PDF): {nombre_raw}", "normal")
+                continue
+            elif file_type == "xlsx" and ext not in ("xlsx", "xls"):
+                self._log(f"   Ignorando (no es XLSX): {nombre_raw}", "normal")
+                continue
+
             href   = await link.get_attribute("href")
-            nombre = nombre_raw.replace("/", "-").replace("\\", "-")
+            nombre = nombre_raw.replace("/", "-").replace(chr(92), "-")
             hrefs.append(href)
             nombres.append(nombre)
 
         if not hrefs:
-            self._log(f"   ⚠️  Sin PDFs con '{trade_id}'", "warning")
+            tipo_label = {"pdf": "PDFs", "xlsx": "XLSXs", "all": "archivos"}.get(file_type, "archivos")
+            filtro_label = {"id": f"ID '{trade_id}'", "all": "sin filtro", "keyword": f"keyword '{keyword}'"}.get(filter_mode, "")
+            self._log(f"   ⚠️  Sin {tipo_label} que coincidan ({filtro_label})", "warning")
             return 0, ESTADO_SIN_ARCH
 
-        self._log(f"   📂 {len(hrefs)} PDF(s) encontrado(s)", "normal")
+        tipo_label = {"pdf": "PDF", "xlsx": "XLSX", "all": "archivo(s)"}.get(file_type, "archivo(s)")
+        self._log(f"   📂 {len(hrefs)} {tipo_label}(s) encontrado(s)", "normal")
         archivos_descargados = 0
 
+        carpeta_existentes = set(f.name for f in carpeta.iterdir() if f.is_file()) if carpeta.exists() else set()
+
         for href, nombre in zip(hrefs, nombres):
+            # Skip if this exact file already exists
+            destino_nombre = f"{nombre}.pdf" if not nombre.lower().endswith(('.pdf','.xlsx','.xls')) else nombre
+            if destino_nombre in carpeta_existentes or nombre in carpeta_existentes:
+                self._log(f"   ⏭️  Ya existe: {nombre}", "normal")
+                archivos_descargados += 1  # count as ok
+                continue
             url_descarga = f"{BASE_URL}{href}"
             self._log(f"   📥 Descargando: {nombre}", "normal")
             try:

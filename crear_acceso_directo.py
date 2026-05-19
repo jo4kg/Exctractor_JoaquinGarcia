@@ -33,7 +33,7 @@ def crear_acceso_directo():
             return False
 
     app_dir     = Path(os.path.dirname(os.path.abspath(__file__)))
-    bat_path    = app_dir / "Iniciar.bat"
+    bat_path    = app_dir / "Iniciar.vbs"
     logo_png    = app_dir / "logo.png"
     logo_ico    = app_dir / "logo.ico"
     lnk_path    = app_dir / "Extractor Trades.lnk"
